@@ -1,10 +1,10 @@
 # Simple Debian Packaging
 
-A basic example of debian packaging with dh-sysuser (to create a user) and dh-systemd (to run a daemon using systemd).
+A basic example of debian packaging with dh-sysuser (to create a user).
 
 ```sh
 # add build dependencies
-apt-get install -y build-essential fakeroot debhelper dh-systemd dh-sysuser
+apt-get install -y build-essential fakeroot debhelper dh-sysuser
 
 # make the debian
 make deb

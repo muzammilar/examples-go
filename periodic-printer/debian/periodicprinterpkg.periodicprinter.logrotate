@@ -1,0 +1,11 @@
+/var/log/periodicprinter/*.log
+{
+    # copytruncate causes log loss for large files
+    copytruncate
+    maxsize 5M
+    weekly
+    rotate 5
+    compress
+    notifempty
+    missingok
+}

@@ -6,11 +6,15 @@ endif
 
 # use dh-systemd for creating a systemd service and dh-sysuser for creating a user (when package is installed)
 %:
-	dh $@ --with systemd,sysuser
+	dh $@ --with sysuser
 
-# use a different name from the package itself
-override_dh_systemd_enable:
+# install systemd service file. Use a different name from the package itself
+override_dh_installsystemd:
 	dh_systemd_enable --name=${PERIODIC_PRINTER}
+
+# add logrotate support to the package
+override_dh_installlogrotate:
+	dh_installlogrotate --name=${PERIODIC_PRINTER}
 
 # save the debian in `dist` directory instead of `..`
 override_dh_builddeb:
