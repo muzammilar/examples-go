@@ -1,0 +1,8 @@
+version: '3.9'
+
+services:
+  grpc-server:
+    image: grpc-server
+    build:
+      context: .
+      dockerfile: ./Dockerfile
