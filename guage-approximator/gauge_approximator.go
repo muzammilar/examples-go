@@ -11,7 +11,7 @@ import (
 )
 
 // Metrics Generator dumps a new metric every interval. It may not be very accurate for high frequencies
-func MetricGenerator(ch chan<- *Metric, sleepIntvl time.Duration) {
+func MetricGenerator(ch chan<- *Metric, generatorId int, sleepIntvl time.Duration) {
 	//
 	var metricStats MetricStats
 	var metric *Metric
@@ -39,7 +39,7 @@ func MetricGenerator(ch chan<- *Metric, sleepIntvl time.Duration) {
 
 		// Print Drop/Sent Metrics every 500 metrics
 		if metricStats.Total%500 == 0 {
-			fmt.Printf("Metrics Counter: %+v\n", metricStats)
+			fmt.Printf("Metrics Counter for Generator#%d: %+v\n", generatorId, metricStats)
 		}
 
 		// offset the channel send interval. This can result in negative duration
@@ -96,6 +96,7 @@ func main() {
 	// number of buckets to store historical data
 	numBucketsPtr := flag.Int("buckets", 3, "Number of buckets to store historical data")
 	intervalSecPtr := flag.Int("interval", 15, "The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used.")
+	numGenerators := flag.Int("generators", 3, "Number of metric generator routines")
 	flag.Parse()
 
 	// constants
@@ -110,7 +111,9 @@ func main() {
 	go MetricsAggregator(ch, uint64(*numBucketsPtr), uint64(*intervalSecPtr)) // skipping error checking for now
 
 	// start metrics generator routine
-	go MetricGenerator(ch, generatorSleep)
+	for i := 0; i < *numGenerators; i++ {
+		go MetricGenerator(ch, i, generatorSleep)
+	}
 
 	// start the signal handler
 	exitChan := make(chan int)
