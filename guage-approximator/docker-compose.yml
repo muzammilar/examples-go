@@ -4,7 +4,7 @@ services:
   guageappx:
     container_name: guageappx
     image: guageappx
-    command: ./guageavg -buckets 60 -interval 5
+    command: ./guageavg -buckets 30 -bucketinterval 5
     build:
       context: .
       dockerfile: ./Dockerfile

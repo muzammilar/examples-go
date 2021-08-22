@@ -11,7 +11,7 @@ import (
 )
 
 // Metrics Generator dumps a new metric every interval. It may not be very accurate for high frequencies
-func MetricGenerator(ch chan<- *Metric, generatorId int, sleepIntvl time.Duration) {
+func MetricGenerator(ch chan<- *Metric, generatorId int, generatorStatsFreq uint64, sleepIntvl time.Duration) {
 	//
 	var metricStats MetricStats
 	var metric *Metric
@@ -37,8 +37,8 @@ func MetricGenerator(ch chan<- *Metric, generatorId int, sleepIntvl time.Duratio
 			metricStats.Dropped += 1
 		}
 
-		// Print Drop/Sent Metrics every 500 metrics
-		if metricStats.Total%500 == 0 {
+		// Print Drop/Sent Metrics every `generatorStatsFreq` metrics
+		if metricStats.Total%generatorStatsFreq == 0 {
 			fmt.Printf("Metrics Counter for Generator#%d: %+v\n", generatorId, metricStats)
 		}
 
@@ -93,26 +93,34 @@ func MetricsAggregator(ch <-chan *Metric, buckets uint64, bucketIntvl uint64) {
 }
 
 func main() {
-	// number of buckets to store historical data
-	numBucketsPtr := flag.Int("buckets", 3, "Number of buckets to store historical data")
-	intervalSecPtr := flag.Int("interval", 15, "The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used.")
-	numGenerators := flag.Int("generators", 3, "Number of metric generator routines")
+
+	// Parse flags; skipping error checking for now
+	numBucketsPtr := *flag.Uint64("buckets", 3, "Number of buckets to store historical data.")
+	intervalSecPtr := *flag.Uint64("bucketinterval", 15, "The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used.")
+	numGenerators := flag.Uint("generators", 3, "Number of metric generator routines.")
+	generatorSleepStr := *flag.String("geninterval", "50ms", "The time duration, as a string, that a generator waits for between sending new metrics to the aggregator.")
+	generatorStatsFreq := *flag.Uint64("genstatsfreq", 500, "The number of metrics generated after which a generator prints its own counters (about number of metrics generated and successfully sent).")
+	channelSizeUint := *flag.Uint("chansize", 1000, "The size of the channel used to pass metrics from generators to aggregator.")
+
 	flag.Parse()
 
 	// constants
-	var channelSize int = 1000
-	generatorSleep, _ := time.ParseDuration("50ms") // skipping error checking for now
+	var channelSize int = int(channelSizeUint)
+	generatorSleep, err := time.ParseDuration(generatorSleepStr)
+	if err != nil {
+		panic(err)
+	}
 
 	// set up shared metrics channel (buffered)
 	var ch chan *Metric
 	ch = make(chan *Metric, channelSize)
 
 	// start the metrics aggregator routine
-	go MetricsAggregator(ch, uint64(*numBucketsPtr), uint64(*intervalSecPtr)) // skipping error checking for now
+	go MetricsAggregator(ch, numBucketsPtr, intervalSecPtr)
 
 	// start metrics generator routine
-	for i := 0; i < *numGenerators; i++ {
-		go MetricGenerator(ch, i, generatorSleep)
+	for i := 0; i < int(*numGenerators); i++ {
+		go MetricGenerator(ch, i, generatorStatsFreq, generatorSleep)
 	}
 
 	// start the signal handler

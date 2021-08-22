@@ -24,6 +24,21 @@ docker-compose up --build --detach
 
 ### Application Help
 
+The application has generator routines and aggregator routine. The generators generate a metric which is sent over a channel to the aggregator. Generators writes are non-blocking on the channel while by the aggregator are always blocking.
+
 ```
 # application help
+Usage of ./guageavg:
+  -buckets uint
+      Number of buckets to store historical data. (default 3)
+  -bucketinterval uint
+      The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used. (default 15)
+  -chansize uint
+      The size of the channel used to pass metrics from generators to aggregator. (default 1000)
+  -generators uint
+      Number of metric generator routines. (default 3)
+  -geninterval string
+      The time duration, as a string, that a generator waits for between sending new metrics to the aggregator. (default "50ms")
+  -genstatsfreq uint
+      The number of metrics generated after which a generator prints its own counters (about number of metrics generated and successfully sent). (default 500)
 ```
