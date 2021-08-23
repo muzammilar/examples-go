@@ -1,0 +1,16 @@
+version: '3.9'
+
+services:
+  titan:
+    image: titan
+    container_name: titan-01
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+  prometheus-01:
+    image: "prom/prometheus"
+    container_name: prometheus-svc-01
+    volumes:
+      - /fdgfgf:/etc/prometheus/
+    ports:
+      - 9090:9090 # http port

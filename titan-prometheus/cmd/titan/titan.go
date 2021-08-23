@@ -10,6 +10,6 @@ func main() {
 
 	// Start a stats and metrics aggregation application
 
-	// Start JetStream to generate metrics
+	// Start Titan to generate metrics
 
 }

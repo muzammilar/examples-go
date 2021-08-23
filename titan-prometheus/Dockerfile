@@ -12,6 +12,6 @@ RUN make install
 #final stage
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
-COPY --from=builder /go/bin/jetstream /app
-ENTRYPOINT ./app
-LABEL Name=jetstream Version=0.0.1
+COPY --from=builder /go/bin/titan /titanserver
+CMD ./titanserver
+LABEL Name=titan Version=0.0.1

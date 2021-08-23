@@ -13,12 +13,12 @@ INSTALL_PREFIX := /go
 DIST_PATH := dist
 
 # src code path macros
-SRC_PATH := cmd/jetstream
-SRC_NAME := jetstream.go
+SRC_PATH := cmd/titan
+SRC_NAME := titan.go
 SRC := $(SRC_PATH)/$(SRC_NAME)
 
 # target macros
-TARGET_NAME := jetstream
+TARGET_NAME := titan
 BIN_PATH := bin
 TARGET := $(BIN_PATH)/$(TARGET_NAME)
 
