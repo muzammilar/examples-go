@@ -31,6 +31,8 @@ services:
       - 3000:3000 # http port
     networks:
       - titan
+    volumes:
+      - ./grafana/datasources/:/etc/grafana/provisioning/datasources/
 
 networks:
   titan:
