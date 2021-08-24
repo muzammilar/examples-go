@@ -10,12 +10,15 @@ services:
       dockerfile: ./Dockerfile
     networks:
       - titan
+    ports:
+      - 18080:8080 # http port
+
   # Prometheus
   prometheus-01:
     image: "prom/prometheus"
     container_name: prometheus-svc-01
     volumes:
-      - /prometheus/config/config.yml:/etc/prometheus/config.yml
+      - ./prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - 9090:9090 # http port
     networks:

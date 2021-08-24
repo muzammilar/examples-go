@@ -8,6 +8,8 @@ var (
 	commit string
 )
 
+// For Temporary Example, use the following: https://raw.githubusercontent.com/prometheus/client_golang/master/examples/random/main.go
+
 func main() {
 
 	// Start a stats and metrics aggregation application
