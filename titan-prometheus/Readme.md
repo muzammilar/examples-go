@@ -9,6 +9,14 @@ docker-compose up --build
 
 ```
 
+## Grafana
+
+Grafana runs by default on port `3000`. Check the details about Grafana docker [here](https://hub.docker.com/r/grafana/grafana).
+
+
+## Prometheus
+
+Prometheus is available by default on port `9090`. Check the details about Prometheus docker [here](https://hub.docker.com/r/prom/prometheus).
 
 ### Prometheus Best Practices
 

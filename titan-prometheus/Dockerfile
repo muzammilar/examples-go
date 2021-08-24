@@ -2,7 +2,7 @@
 FROM golang:alpine AS builder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
-COPY . .
+COPY ./titan .
 RUN apk add make git
 RUN make mod-init
 RUN make mod-deps
