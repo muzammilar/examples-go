@@ -39,7 +39,7 @@ func MetricGenerator(ch chan<- *Metric, generatorId int, generatorStatsFreq uint
 
 		// Print Drop/Sent Metrics every `generatorStatsFreq` metrics
 		if metricStats.Total%generatorStatsFreq == 0 {
-			fmt.Printf("Metrics Counter for Generator#%d: %+v\n", generatorId, metricStats)
+			fmt.Printf("Metrics Counter for Generator#%d: %+v. Current channel length (gauge):%d. \n", generatorId, metricStats, len(ch))
 		}
 
 		// offset the channel send interval. This can result in negative duration
