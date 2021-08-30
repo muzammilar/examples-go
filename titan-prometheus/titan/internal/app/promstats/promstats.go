@@ -1,8 +1,8 @@
 /*
- * Stats Server Package
+ * Prometheus Stats Server Package
  */
 
-package statsserver
+package promstats
 
 import (
 	"log"
@@ -28,12 +28,12 @@ var (
 		},
 		[]string{"service"},
 	)
-	// The same as above, but now as a histogram, and only for the normal
+	// The same as above, but now as a summary, and only for the normal
 	// distribution. The buckets are targeted to the parameters of the
 	// normal distribution, with 20 buckets centered on the mean, each
 	// half-sigma wide.
 	rpcDurationsHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
-		Name:    "rpc_durations_histogram_seconds",
+		Name:    "rpc_durations_summary_seconds",
 		Help:    "RPC latency distributions.",
 		Buckets: prometheus.LinearBuckets(*normMean-5**normDomain, .5**normDomain, 20),
 	})

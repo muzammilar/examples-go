@@ -29,15 +29,14 @@ func StartTitan(oscillationPeriod time.Duration) {
 		fmt.Println("All Titan Oscillators have been started.")
 	}()
 
-	// Periodically record some sample latencies for the three services.
-	go exponentialOscillator()
-	go func() {
-		for {
-		}
-	}()
+	// Prometheus Example: Periodically record some sample latencies for the three services.
+	go exponentialOscillator([]string{"titan", "exponential"}, oscillationFactor)
+	go uniformOscillator([]string{"titan", "uniform"}, oscillationFactor)
+	go normalOscillator([]string{"titan", "normal"}, oscillationFactor)
 
-	go func() {
-	}()
+	// gokit-metrics prometheus example
+
+	// gokit-metrics statsd example
 
 }
 
