@@ -1,8 +1,8 @@
 /*
- * Prometheus Stats Server Package
+ * Metrics Package
  */
 
-// This package is not very well designed but is as such to avoid making major changes to the initial example
+// An internal metrics package
 
 package metrics
 
