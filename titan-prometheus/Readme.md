@@ -1,13 +1,13 @@
 # Titan
 
-**Note: This example is a work in progress**
-
 A basic example of building a stats/metrics server for a running application using Prometheus. Titan generates metrics/stats that are aggregated by a stats server routine and exposed to Prometheus.
 
 ```sh
 docker-compose up --build
 
 ```
+
+Titan metrics are exposed locally on `localhost:18080/metrics` for the user (since port `8080` on the guest is mapped to `18080` for the host).
 
 ## Grafana
 

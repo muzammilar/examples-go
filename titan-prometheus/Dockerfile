@@ -1,11 +1,14 @@
 #build stage
 FROM golang:alpine AS builder
 RUN apk add --no-cache git
+# for go vet (install gcc)
+RUN apk add build-base
 WORKDIR /go/src/app
 COPY ./titan .
 RUN apk add make git
 RUN make mod-init
 RUN make mod-deps
+RUN make lint-deps
 RUN make
 RUN make install
 
