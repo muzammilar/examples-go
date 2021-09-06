@@ -2,7 +2,6 @@
 GO:=go
 GOTEST:=$(GO) test
 GOFORMAT:=GOFORMAT
-GOLINT:=golint
 
 # version macros
 DATE := $(shell /bin/date -u +"%Y-%m-%d~%H:%M:%S")
@@ -28,7 +27,7 @@ CLEAN_LIST := $(TARGET) \
 			  $(DIST_CLEAN_LIST)
 
 # default goal for Makefile
-.PHONY: all makedir format lint test mod-init mod-deps clean distclean install uninstall
+.PHONY: all makedir format lint-deps lint test mod-init mod-deps clean distclean install uninstall
 all: clean lint test makedir $(TARGET)
 
 # non-phony targets
@@ -42,8 +41,11 @@ makedir:
 format:
 	$(GOFORMAT) ./...
 
+lint-deps:
+	$(GO) install honnef.co/go/tools/cmd/staticcheck@latest
+
 lint:
-	$(GOLINT) ./...
+	$(GO) vet ./...
 
 test:
 	$(GOTEST) ./...

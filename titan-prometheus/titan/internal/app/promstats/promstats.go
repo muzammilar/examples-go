@@ -20,7 +20,7 @@ import (
 
 var (
 	RpcDurations          *prometheus.SummaryVec
-	RpcDurationsHistogram *prometheus.Histogram
+	RpcDurationsHistogram prometheus.Histogram
 )
 
 // Custom init function of the package that can takes in some arguments
