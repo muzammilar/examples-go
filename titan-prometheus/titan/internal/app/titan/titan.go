@@ -34,9 +34,9 @@ func StartTitan(oscillationPeriod time.Duration, uniformDomain float64, normDoma
 	}()
 
 	// Prometheus Example: Periodically record some sample latencies for the three services.
-	go exponentialOscillator([]string{"titan", "exponential"}, oscillationFactor)
-	go uniformOscillator([]string{"titan", "uniform"}, oscillationFactor, uniformDomain)
-	go normalOscillator([]string{"titan", "normal"}, oscillationFactor, normDomain, normMean)
+	go exponentialOscillator([]string{"randprom", "exponential"}, oscillationFactor)
+	go uniformOscillator([]string{"randprom", "uniform"}, oscillationFactor, uniformDomain)
+	go normalOscillator([]string{"randprom", "normal"}, oscillationFactor, normDomain, normMean)
 
 	// gokit-metrics prometheus example
 
