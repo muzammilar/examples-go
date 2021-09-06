@@ -50,10 +50,11 @@ lint:
 .PHONY: test
 test:
 	$(GOTEST) ./...
+	$(GOTEST) -bench=. ./...
 
 .PHONY: mod-init
 mod-init:
-	$(GO) mod init
+	$(GO) mod init github.com/muzammilar/examples-go/titan-prometheus/titan
 
 .PHONY: mod-deps
 mod-deps:

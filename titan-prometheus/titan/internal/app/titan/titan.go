@@ -9,6 +9,10 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+
+	"github.com/muzammilar/examples-go/titan-prometheus/titan/internal/app/promstats"
 )
 
 /*
@@ -19,7 +23,7 @@ import (
  * Public Functions
  */
 
-func StartTitan(oscillationPeriod time.Duration) {
+func StartTitan(oscillationPeriod time.Duration, uniformDomain float64, normDomain float64, normMean float64) {
 	start := time.Now()
 
 	oscillationFactor := getOscillationFactorFunc(start, oscillationPeriod)
@@ -31,8 +35,8 @@ func StartTitan(oscillationPeriod time.Duration) {
 
 	// Prometheus Example: Periodically record some sample latencies for the three services.
 	go exponentialOscillator([]string{"titan", "exponential"}, oscillationFactor)
-	go uniformOscillator([]string{"titan", "uniform"}, oscillationFactor)
-	go normalOscillator([]string{"titan", "normal"}, oscillationFactor)
+	go uniformOscillator([]string{"titan", "uniform"}, oscillationFactor, uniformDomain)
+	go normalOscillator([]string{"titan", "normal"}, oscillationFactor, normDomain, normMean)
 
 	// gokit-metrics prometheus example
 
@@ -47,29 +51,29 @@ func StartTitan(oscillationPeriod time.Duration) {
 func exponentialOscillator(labels []string, oscillationFactor func() float64) {
 	for {
 		v := rand.ExpFloat64() / 1e6
-		rpcDurations.WithLabelValues(labels...).Observe(v)
+		promstats.RpcDurations.WithLabelValues(labels...).Observe(v)
 		time.Sleep(time.Duration(50*oscillationFactor()) * time.Millisecond)
 	}
 }
 
-func uniformOscillator(labels []string, oscillationFactor func() float64) {
-	v := rand.Float64() * *uniformDomain
-	rpcDurations.WithLabelValues("uniform").Observe(v)
+func uniformOscillator(labels []string, oscillationFactor func() float64, uniformDomain float64) {
+	v := rand.Float64() * uniformDomain
+	promstats.RpcDurations.WithLabelValues(labels...).Observe(v)
 	time.Sleep(time.Duration(100*oscillationFactor()) * time.Millisecond)
 
 }
 
-func normalOscillator(labels []string, oscillationFactor func() float64) {
+func normalOscillator(labels []string, oscillationFactor func() float64, normDomain float64, normMean float64) {
 	for {
-		v := (rand.NormFloat64() * *normDomain) + *normMean
-		rpcDurations.WithLabelValues("normal").Observe(v)
+		v := (rand.NormFloat64() * normDomain) + normMean
+		promstats.RpcDurations.WithLabelValues(labels...).Observe(v)
 		// Demonstrate exemplar support with a dummy ID. This
 		// would be something like a trace ID in a real
 		// application.  Note the necessary type assertion. We
 		// already know that rpcDurationsHistogram implements
 		// the ExemplarObserver interface and thus don't need to
 		// check the outcome of the type assertion.
-		rpcDurationsHistogram.(prometheus.ExemplarObserver).ObserveWithExemplar(
+		promstats.RpcDurationsHistogram.(prometheus.ExemplarObserver).ObserveWithExemplar(
 			v, prometheus.Labels{"dummyID": fmt.Sprint(rand.Intn(100000))},
 		)
 		time.Sleep(time.Duration(75*oscillationFactor()) * time.Millisecond)

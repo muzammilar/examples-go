@@ -18,92 +18,45 @@ package main
 
 import (
 	"flag"
-	"fmt"
-	"log"
-	"math"
-	"math/rand"
-	"net/http"
 	"time"
 
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/muzammilar/examples-go/titan-prometheus/titan/internal/app/promstats"
+	"github.com/muzammilar/examples-go/titan-prometheus/titan/internal/app/titan"
 )
-
-var ()
 
 var (
 	// ldflags
 	date   string
 	commit string
+	// cli flags
+	addr              string
+	uniformDomain     float64
+	normDomain        float64
+	normMean          float64
+	oscillationPeriod *time.Duration
 )
 
 // The example has been taken from the following: https://raw.githubusercontent.com/prometheus/client_golang/master/examples/random/main.go
 
-func main() {
+// ideally flags should be parsed in main and not init, but for sake of example, we'll use `init`
+func init() {
 	// flags
 	addr = *flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
-	uniformDomain = flag.Float64("uniform.domain", 0.0002, "The domain for the uniform distribution.")
+	uniformDomain = *flag.Float64("uniform.domain", 0.0002, "The domain for the uniform distribution.")
 	normDomain = *flag.Float64("normal.domain", 0.0002, "The domain for the normal distribution.")
 	normMean = *flag.Float64("normal.mean", 0.00001, "The mean for the normal distribution.")
 	oscillationPeriod = flag.Duration("oscillation-period", 10*time.Minute, "The duration of the rate oscillation period.")
 	flag.Parse()
-
-	// Start a stats and metrics aggregation application
-
-	// Start Titan to generate metrics
-	titan.StartTitan()
 }
 
 func main() {
-	flag.Parse()
+	// custom initializations
+	promstats.Init(normMean, normDomain)
 
-	start := time.Now()
+	// Start a stats and metrics aggregation application
 
-	oscillationFactor := func() float64 {
-		return 2 + math.Sin(math.Sin(2*math.Pi*float64(time.Since(start))/float64(*oscillationPeriod)))
-	}
+	// Start Titan to generate metrics (has go routines)
+	titan.StartTitan(*oscillationPeriod, uniformDomain, normDomain, normMean)
 
-	// Periodically record some sample latencies for the three services.
-	go func() {
-		for {
-			v := rand.Float64() * *uniformDomain
-			rpcDurations.WithLabelValues("uniform").Observe(v)
-			time.Sleep(time.Duration(100*oscillationFactor()) * time.Millisecond)
-		}
-	}()
-
-	go func() {
-		for {
-			v := (rand.NormFloat64() * *normDomain) + *normMean
-			rpcDurations.WithLabelValues("normal").Observe(v)
-			// Demonstrate exemplar support with a dummy ID. This
-			// would be something like a trace ID in a real
-			// application.  Note the necessary type assertion. We
-			// already know that rpcDurationsHistogram implements
-			// the ExemplarObserver interface and thus don't need to
-			// check the outcome of the type assertion.
-			rpcDurationsHistogram.(prometheus.ExemplarObserver).ObserveWithExemplar(
-				v, prometheus.Labels{"dummyID": fmt.Sprint(rand.Intn(100000))},
-			)
-			time.Sleep(time.Duration(75*oscillationFactor()) * time.Millisecond)
-		}
-	}()
-
-	go func() {
-		for {
-			v := rand.ExpFloat64() / 1e6
-			rpcDurations.WithLabelValues("exponential").Observe(v)
-			time.Sleep(time.Duration(50*oscillationFactor()) * time.Millisecond)
-		}
-	}()
-
-	// Expose the registered metrics via HTTP.
-	http.Handle("/metrics", promhttp.HandlerFor(
-		prometheus.DefaultGatherer,
-		promhttp.HandlerOpts{
-			// Opt into OpenMetrics to support exemplars.
-			EnableOpenMetrics: true,
-		},
-	))
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	promstats.PromServer(addr)
 }

@@ -2,6 +2,8 @@
  * Prometheus Stats Server Package
  */
 
+// This package is not very well designed but is as such to avoid making major changes to the initial example
+
 package promstats
 
 import (
@@ -17,10 +19,16 @@ import (
  */
 
 var (
+	RpcDurations          *prometheus.SummaryVec
+	RpcDurationsHistogram *prometheus.Histogram
+)
+
+// Custom init function of the package that can takes in some arguments
+func Init(normMean float64, normDomain float64) {
 	// Create a summary to track fictional interservice RPC latencies for three
 	// distinct services with different latency distributions. These services are
 	// differentiated via a "service" label.
-	rpcDurations = prometheus.NewSummaryVec(
+	RpcDurations = prometheus.NewSummaryVec(
 		prometheus.SummaryOpts{
 			Name:       "rpc_durations_seconds",
 			Help:       "RPC latency distributions.",
@@ -32,18 +40,15 @@ var (
 	// distribution. The buckets are targeted to the parameters of the
 	// normal distribution, with 20 buckets centered on the mean, each
 	// half-sigma wide.
-	rpcDurationsHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
+	RpcDurationsHistogram = prometheus.NewHistogram(prometheus.HistogramOpts{
 		Name:    "rpc_durations_summary_seconds",
 		Help:    "RPC latency distributions.",
-		Buckets: prometheus.LinearBuckets(*normMean-5**normDomain, .5**normDomain, 20),
+		Buckets: prometheus.LinearBuckets(normMean-5*normDomain, .5*normDomain, 20),
 	})
-)
 
-// Init function of the package
-func init() {
 	// Register the summary and the histogram with Prometheus's default registry.
-	prometheus.MustRegister(rpcDurations)
-	prometheus.MustRegister(rpcDurationsHistogram)
+	prometheus.MustRegister(RpcDurations)
+	prometheus.MustRegister(RpcDurationsHistogram)
 	// Add Go module build info.
 	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
 }
@@ -52,7 +57,8 @@ func init() {
  * Public Functions
  */
 
-func PromServer() {
+// PromServer takes an address of a server (as a string) and starts serving a prometheus server on that address
+func PromServer(addr string) {
 	// Expose the registered metrics via HTTP.
 	http.Handle("/metrics", promhttp.HandlerFor(
 		prometheus.DefaultGatherer,
@@ -61,6 +67,6 @@ func PromServer() {
 			EnableOpenMetrics: true,
 		},
 	))
-	log.Fatal(http.ListenAndServe(*addr, nil))
+	log.Fatal(http.ListenAndServe(addr, nil))
 
 }
