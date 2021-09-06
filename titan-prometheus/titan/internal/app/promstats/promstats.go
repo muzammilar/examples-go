@@ -34,7 +34,7 @@ func Init(normMean float64, normDomain float64) {
 			Help:       "RPC latency distributions.",
 			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
 		},
-		[]string{"service"},
+		[]string{"service", "algorithm"}, // number of labels
 	)
 	// The same as above, but now as a summary, and only for the normal
 	// distribution. The buckets are targeted to the parameters of the
