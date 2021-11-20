@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package areapb;
+
+option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/areapb";
+
+message Shape {
+
+    enum ShapeType {
+        RECTANGLE = 0;
+        CUBOID = 1;
+      }
+
+      message PhoneNumber {
+        string number = 1;
+        PhoneType type = 2;
+      }
+
+      repeated PhoneNumber phones = 4;
+
+      google.protobuf.Timestamp last_updated = 5;
+
+}
+
+message Cuboid {
+
+    Rectangle rectangle = 1;
+    int64 height = 2;
+
+}
+
+message Rectangle {
+    int64 length = 1;
+    int64 width = 2;
+
+}

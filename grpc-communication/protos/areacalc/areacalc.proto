@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package areacalc;
+
+option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/areapb";
+
+import "github.com/muzammilar/examples-go/grpc-communication/protos/areapb/areapb.proto";

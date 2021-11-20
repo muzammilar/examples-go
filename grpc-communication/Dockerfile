@@ -1,5 +1,20 @@
+ARG ALPINE_BUILD_VERSION=latest
+ARG SERVER_VERSION=0.0.1
+ARG CLIENT_VERSION=0.0.1
+ARG GO_VERSION=1.17
+# build protobuf
+FROM alpine:$ALPINE_BUILD_VERSION AS proto_builder
+# ARG are reset after every FROM statement, so need redeclaration
+ARG ALPINE_BUILD_VERSION
+
+
+
+
+########################
 #build stage
-FROM golang:alpine AS builder
+# ARG are reset after every FROM statement, so need redeclaration
+ARG GO_VERSION
+FROM golang:${GO_VERSION}-alpine AS builder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
 COPY . .
@@ -7,9 +22,11 @@ RUN go mod init
 RUN go get -d -v ./...
 RUN go install -v ./...
 
-#final stage
+#server final stage
 FROM alpine:latest
+# ARG are reset after every FROM statement, so need redeclaration
+ARG SERVER_VERSION
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /go/bin/app /app
 ENTRYPOINT ./app
-LABEL Name=grpc-server Version=0.0.1
+LABEL Name=grpc-server Version=${SERVER_VERSION}
