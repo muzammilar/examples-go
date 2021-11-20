@@ -1,5 +1,7 @@
 # shell variables
-date := $(shell date)
+DATE := $(shell date -u +"%Y-%m-%d")
+PWD := $(shell pwd)
+DISTRO := $(shell lsb_release -cs)
 
 # Get the build/release version
 ifdef PKG_VERSION
@@ -25,7 +27,7 @@ export PKG_NAME
 export PREF_PKG_LOG
 
 # Makefile
-.PHONY: all clean format lint ${PERIODIC_PRINTER} install uninstall
+.PHONY: all clean format lint ${PERIODIC_PRINTER} install uninstall deb deb-clean deb-changelog-create deb-build deb-clean-changelog
 all: clean ${PERIODIC_PRINTER}
 
 clean:
@@ -33,7 +35,7 @@ clean:
 	-rm -f debian/${PKG_NAME}
 
 ${PERIODIC_PRINTER}:
-	go build -ldflags "-X main.date=${date}" -o build/${PERIODIC_PRINTER} ./cmd/pprinter/pprinter.go
+	go build -ldflags "-X main.date='${DATE}'" -o build/${PERIODIC_PRINTER} ./cmd/pprinter/pprinter.go
 
 lint:
 	golint ./...
@@ -42,9 +44,11 @@ format:
 	goimports -l -w .
 
 # install is called by the package builder
-install:
+install: ${PERIODIC_PRINTER}
 	install -v -d build/${PERIODIC_PRINTER} $(DESTDIR)${PREF_PKG_BIN}/bin/${PERIODIC_PRINTER}
+# logs directory
 	install -v -d $(DESTDIR)${PREF_PKG_LOG}
+	dh_install
 
 uninstall:
 	-rm -f $(DESTDIR)$(PREF_PKG_BIN)/bin/${PERIODIC_PRINTER}
@@ -52,11 +56,26 @@ uninstall:
 
 # debian building
 # note: we create a deb changelog here because it's an example. Ideally, the changelog file should be only incremented with `dch -i`
-deb: deb-changelog-create deb-build
+deb: deb-clean deb-changelog-create deb-build
 
-deb-changelog-create:
-	dch --create --package ${PKG_NAME}
-	dch -v ${PKG_VERSION}
+deb-clean: deb-clean-changelog
+	-rm -f dist/*.deb
+	-rm -f debian/${PKG_NAME}
+	-rm -f debian/.debhelper/
+
+deb-clean-changelog:
+	-rm -f debian/changelog
+
+deb-changelog-create: deb-clean-changelog
+	dch --create --package ${PKG_NAME} -D ${DISTRO} -v ${PKG_VERSION} "Release: ${PKG_VERSION}"
 
 deb-build:
+# check build deps
+	dpkg-checkbuilddeps
+# build
+	fakeroot debian/rules binary
 	dpkg-buildpackage -us -uc
+
+buildcontainer:
+	docker build -t ppbuilder .
+	docker run --rm --volume "${PWD}:/pkgbuilddir" --workdir="/pkgbuilddir" -it ppbuilder
