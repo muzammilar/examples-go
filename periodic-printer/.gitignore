@@ -1,0 +1,5 @@
+*.exe
+
+build/periodicprinter
+
+debian/changelog

@@ -8,15 +8,12 @@ ifndef PKG_NAME
 $(error PKG_NAME not defined)
 endif
 
-
 # use verbose logging to easily debug builds
 DH_VERBOSE = 1
 
 # use dh-systemd for creating a systemd service and dh-sysuser for creating a user (when package is installed)
 %:
-	echo "hERRE"
 	dh $@ --with sysuser
-	echo "hERRE2"
 
 # install systemd service file. Use a different name from the package itself
 override_dh_installsystemd:

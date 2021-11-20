@@ -30,7 +30,7 @@ export PREF_PKG_LOG
 .PHONY: all clean format lint ${PERIODIC_PRINTER} install uninstall deb deb-clean deb-changelog-create deb-build deb-clean-changelog
 all: clean ${PERIODIC_PRINTER}
 
-clean:
+clean: deb-clean-changelog
 	-rm -f ${PERIODIC_PRINTER}
 	-rm -f debian/${PKG_NAME}
 
@@ -73,7 +73,6 @@ deb-build:
 # check build deps
 	dpkg-checkbuilddeps
 # build
-	fakeroot debian/rules binary
 	dpkg-buildpackage -us -uc
 
 buildcontainer:
