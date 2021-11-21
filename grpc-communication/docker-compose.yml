@@ -2,20 +2,25 @@ version: '3.9'
 
 services:
   prereqs:
-    image: protobuilder:${TAG:-latest}
+    image: areacalc/protobuilder:${TAG:-latest}
     build:
       context: ./
       dockerfile: ./docker/protobuilder/Dockerfile
+    deploy:
+      replicas: 0
   areaserver:
-    depends_on:
-      - prereqs
     build:
       context: ./
       dockerfile: ./docker/areaserver/Dockerfile
     image: areacalc/server:${TAG:-latest}
-  areasclient:
+    deploy:
+      mode: replicated
+      replicas: 3
+      endpoint_mode: vip
+  areaclient:
+    # only gurantees the start order (clients can still start before the server)
     depends_on:
-      - prereqs
+      - areaserver
     build:
       context: ./
       dockerfile: ./docker/areaclient/Dockerfile

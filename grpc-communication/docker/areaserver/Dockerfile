@@ -5,7 +5,7 @@ ARG GO_VERSION=1.17
 
 # ARG are reset after every FROM statement, so need redeclaration
 ARG GO_VERSION
-FROM golang:${GO_VERSION}-alpine AS builder
+FROM areacalc/protobuilder:latest AS builder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
 COPY . .
