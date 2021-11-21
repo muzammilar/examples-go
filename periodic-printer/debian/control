@@ -1,12 +1,12 @@
 Source: periodicprinterpkg
 Section: unknown
 Maintainer: Muzammil Abdul Rehman <example.email@foo.com>
-Build-Depends: debhelper (>=10), dh-systemd, dh-sysuser
+Build-Depends: debhelper (>=10), dh-sysuser
 Standards-Version: 4.0.0
 Homepage: github.com/muzammilar
 
 Package: periodicprinterpkg
-Architecture: Any
+Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Periodic Printer
