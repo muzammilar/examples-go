@@ -13,6 +13,9 @@ endif
 # program name
 PERIODIC_PRINTER = periodicprinter
 
+# directory containing the final debian file (this can be relative or absolute, default is '..')
+DEB_OUT_DIR = dist
+
 # Package Info
 PKG_USER = pprintuser
 PKG_NAME = periodicprinterpkg
@@ -24,14 +27,15 @@ PREF_PKG_LOG = /var/log/periodicprinter
 export PERIODIC_PRINTER
 export PREF_PKG_LOG
 export PKG_USER
+export DEB_OUT_DIR
 
 # Makefile
 .PHONY: all clean format lint ${PERIODIC_PRINTER} install uninstall deb deb-clean deb-changelog-create deb-build deb-clean-changelog
 all: clean ${PERIODIC_PRINTER}
 
-clean:
-	-rm -f ${PERIODIC_PRINTER}
-	-rm -f debian/${PKG_NAME}
+clean: deb-clean
+	-rm -f build/${PERIODIC_PRINTER}
+
 
 ${PERIODIC_PRINTER}:
 	go build -ldflags "-X main.date='${DATE}'" -o build/${PERIODIC_PRINTER} ./cmd/pprinter/pprinter.go
@@ -58,10 +62,10 @@ uninstall:
 # note: we create a deb changelog here because it's an example. Ideally, the changelog file should be only incremented with `dch -i`
 deb: deb-clean deb-changelog-create deb-build
 
-deb-clean: deb-clean-changelog
+deb-clean:
 	-rm -f dist/*.deb
-	-rm -f debian/${PKG_NAME}
-	-rm -f debian/.debhelper/
+	-rm -rf debian/${PKG_NAME}
+	-rm -rf debian/.debhelper/
 
 deb-clean-changelog:
 	-rm -f debian/changelog
@@ -73,7 +77,10 @@ deb-build:
 # check build deps
 	dpkg-checkbuilddeps
 # build
-	dpkg-buildpackage -us -uc
+# --buildinfo-option is passed to dpkg-genbuildinfo
+# --changes-option is passed to dpkg-genchanges
+#	dpkg-buildpackage --unsigned-source --unsigned-changes --buildinfo-option="-u${DEB_OUT_DIR}" --changes-option="-u${DEB_OUT_DIR}"
+	dpkg-buildpackage --unsigned-source --unsigned-changes
 
 buildcontainer:
 	docker build -t ppbuilder .

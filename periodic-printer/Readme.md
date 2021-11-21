@@ -11,15 +11,17 @@ make buildcontainer
 make deb
 
 # check the contents of the debian
-dpkg --contents dist/*.deb
-dpkg -I dist/*.deb
+dpkg --contents ../*.deb
+dpkg -I ../*.deb
 
-# install the deb on the target machine
+# install the deb on the target machine (example)
+apt install -y ../periodicprinterpkg_0.0.1-0_amd64.deb
 ```
 
 ## Note for Windows Docker users
-Please make sure that you are using `LF` line ending and not `CRLF` for the `debian/rules` file, otherwise, you will run into the following error.
+Please make sure that you are using `LF` line ending and not `CRLF` for *all* files in `debian/` directory, otherwise, you will run into errors.
 
+Example error (or `postinst` failures):
 ```
 : No such file or directory
 cc      -o .o
