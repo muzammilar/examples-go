@@ -1,8 +1,25 @@
 version: '3.9'
 
 services:
-  grpc-server:
-    image: grpc-server
+  prereqs:
+    image: protobuilder:${TAG:-latest}
     build:
-      context: .
-      dockerfile: ./Dockerfile
+      context: ./
+      dockerfile: ./docker/protobuilder/Dockerfile
+  areaserver:
+    depends_on:
+      - prereqs
+    build:
+      context: ./
+      dockerfile: ./docker/areaserver/Dockerfile
+    image: areacalc/server:${TAG:-latest}
+  areasclient:
+    depends_on:
+      - prereqs
+    build:
+      context: ./
+      dockerfile: ./docker/areaclient/Dockerfile
+    image: areacalc/client:${TAG:-latest}
+    deploy:
+      mode: replicated
+      replicas: 6

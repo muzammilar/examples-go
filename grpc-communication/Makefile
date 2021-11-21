@@ -14,7 +14,7 @@ CLIENT_VERSION := ${DEFAULT_VERSION}
 SERVER=areaserver
 CLIENT=areaclient
 
-.PHONY: all clean certs dockercompose
+.PHONY: all clean certs gomodule protos certs
 
 all: clean gomodule protos certs ${SERVER} ${CLIENT}
 
@@ -56,6 +56,3 @@ certs:
 	openssl req -new -x509 -sha256 \
 	-key server.grpc.key -out server.grpc.crt -days 3650 \
 	-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=server.grpc"
-
-dockercompose:
-	echo "hello world"

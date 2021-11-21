@@ -2,16 +2,7 @@ ARG ALPINE_BUILD_VERSION=latest
 ARG SERVER_VERSION=0.0.1
 ARG CLIENT_VERSION=0.0.1
 ARG GO_VERSION=1.17
-# build protobuf
-FROM alpine:$ALPINE_BUILD_VERSION AS proto_builder
-# ARG are reset after every FROM statement, so need redeclaration
-ARG ALPINE_BUILD_VERSION
 
-
-
-
-########################
-#build stage
 # ARG are reset after every FROM statement, so need redeclaration
 ARG GO_VERSION
 FROM golang:${GO_VERSION}-alpine AS builder
