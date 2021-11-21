@@ -4,10 +4,6 @@ ifndef PERIODIC_PRINTER
 $(error PERIODIC_PRINTER not defined)
 endif
 
-ifndef PKG_NAME
-$(error PKG_NAME not defined)
-endif
-
 # use verbose logging to easily debug builds
 DH_VERBOSE = 1
 
@@ -17,7 +13,7 @@ DH_VERBOSE = 1
 
 # install systemd service file. Use a different name from the package itself
 override_dh_installsystemd:
-	dh_systemd_enable --name=${PERIODIC_PRINTER}
+	dh_installsystemd --name=${PERIODIC_PRINTER}
 
 # add logrotate support to the package
 override_dh_installlogrotate:
@@ -25,4 +21,4 @@ override_dh_installlogrotate:
 
 # save the debian in `dist` directory instead of `..`
 override_dh_builddeb:
-	dh_builddeb --destdir=dist/ --filename=${PKG_NAME}
+	dh_builddeb --destdir=dist/

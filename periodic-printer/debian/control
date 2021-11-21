@@ -6,7 +6,7 @@ Standards-Version: 4.0.0
 Homepage: github.com/muzammilar
 
 Package: periodicprinterpkg
-Architecture: Any
+Architecture: any
 Pre-Depends: ${misc:Pre-Depends}
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: Periodic Printer

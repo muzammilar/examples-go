@@ -16,3 +16,12 @@ dpkg -I dist/*.deb
 
 # install the deb on the target machine
 ```
+
+## Note for Windows Docker users
+Please make sure that you are using `LF` line ending and not `CRLF` for the `debian/rules` file, otherwise, you will run into the following error.
+
+```
+: No such file or directory
+cc      -o .o
+cc: fatal error: no input files
+```

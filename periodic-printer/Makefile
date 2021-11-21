@@ -18,19 +18,18 @@ PKG_USER = pprintuser
 PKG_NAME = periodicprinterpkg
 
 # Install locations
-PREF_PKG_BIN = /usr/local
 PREF_PKG_LOG = /var/log/periodicprinter
 
 # exports
 export PERIODIC_PRINTER
-export PKG_NAME
 export PREF_PKG_LOG
+export PKG_USER
 
 # Makefile
 .PHONY: all clean format lint ${PERIODIC_PRINTER} install uninstall deb deb-clean deb-changelog-create deb-build deb-clean-changelog
 all: clean ${PERIODIC_PRINTER}
 
-clean: deb-clean-changelog
+clean:
 	-rm -f ${PERIODIC_PRINTER}
 	-rm -f debian/${PKG_NAME}
 
@@ -45,13 +44,14 @@ format:
 
 # install is called by the package builder
 install: ${PERIODIC_PRINTER}
-	install -v -d build/${PERIODIC_PRINTER} $(DESTDIR)${PREF_PKG_BIN}/bin/${PERIODIC_PRINTER}
+	install -v -d $(DESTDIR)$(prefix)
+	install -v -d $(DESTDIR)$(prefix)/bin
+	install -v -m 750 build/${PERIODIC_PRINTER} $(DESTDIR)$(prefix)/bin
 # logs directory
 	install -v -d $(DESTDIR)${PREF_PKG_LOG}
-	dh_install
 
 uninstall:
-	-rm -f $(DESTDIR)$(PREF_PKG_BIN)/bin/${PERIODIC_PRINTER}
+	-rm -f $(DESTDIR)$(prefix)/bin/${PERIODIC_PRINTER}
 	-rm -f $(DESTDIR)$(PREF_PKG_LOG)
 
 # debian building
