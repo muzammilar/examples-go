@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package areacalc;
+package geometry;
 
 option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/areapb";
 

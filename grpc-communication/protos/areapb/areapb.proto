@@ -4,33 +4,47 @@ package areapb;
 
 option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/areapb";
 
-message Shape {
+message ShapeInfo {
 
-    enum ShapeType {
-        RECTANGLE = 0;
-        CUBOID = 1;
-      }
+  enum QuantityType {
+    AREA = 1;
+    VOLUME = 2;
+    PERIMETER = 3;
+  }
 
-      message PhoneNumber {
-        string number = 1;
-        PhoneType type = 2;
-      }
+  enum ShapeType {
+    RECTANGLE = 1;
+    CUBE = 2;
+  }
 
-      repeated PhoneNumber phones = 4;
+  message Mesurement {
+    QuantityType name = 1;
+    float64 value = 2;
+  }
 
-      google.protobuf.Timestamp last_updated = 5;
+  Identifier id = 1;
+  ShapeType shape = 2;
+
+  repeated Mesurements mesurements = 4;
+
+  google.protobuf.Timestamp timestamp = 3;
 
 }
 
 message Cuboid {
-
-    Rectangle rectangle = 1;
-    int64 height = 2;
-
+  Identifier id = 1;
+  int64 length = 2;
+  int64 width = 3;
+  int64 height = 4;
 }
 
 message Rectangle {
-    int64 length = 1;
-    int64 width = 2;
+  Identifier id = 1;
+  int64 length = 2;
+  int64 width = 3;
+}
 
+message Identifier {
+  int id = 1; // unique ID of a shape
+  string name = 2; // name of the shape
 }
