@@ -11,8 +11,8 @@ SERVER_VERSION := ${DEFAULT_VERSION}
 CLIENT_VERSION := ${DEFAULT_VERSION}
 
 # Applications
-SERVER=areaserver
-CLIENT=areaclient
+SERVER=geomserver
+CLIENT=geomclient
 
 .PHONY: all clean certs gomodule protos certs
 

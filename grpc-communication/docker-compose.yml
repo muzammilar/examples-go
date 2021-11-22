@@ -8,22 +8,32 @@ services:
       dockerfile: ./docker/protobuilder/Dockerfile
     deploy:
       replicas: 0
-  areaserver:
+  geomserver:
     build:
       context: ./
-      dockerfile: ./docker/areaserver/Dockerfile
+      dockerfile: ./docker/geomserver/Dockerfile
     image: geometry/server:${TAG:-latest}
     deploy:
       mode: replicated
       replicas: 3
       endpoint_mode: vip
-  areaclient:
-    # only gurantees the start order (clients can still start before the server)
-    depends_on:
-      - areaserver
+  dataserver:
     build:
       context: ./
-      dockerfile: ./docker/areaclient/Dockerfile
+      dockerfile: ./docker/dataserver/Dockerfile
+    image: geometry/dataserver:${TAG:-latest}
+    deploy:
+      mode: replicated
+      replicas: 3
+      endpoint_mode: vip
+  geomclient:
+    # only gurantees the start order (clients can still start before the server)
+    depends_on:
+      - geomserver
+      - dataserver
+    build:
+      context: ./
+      dockerfile: ./docker/geomclient/Dockerfile
     image: geometry/client:${TAG:-latest}
     deploy:
       mode: replicated
