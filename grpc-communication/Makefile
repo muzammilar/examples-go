@@ -14,16 +14,18 @@ CLIENT_VERSION := ${DEFAULT_VERSION}
 SERVER=geomserver
 CLIENT=geomclient
 
-.PHONY: all clean certs gomodule protos certs
+.PHONY: all clean certs gomodule protos certs clean_protos
 
 all: clean gomodule protos certs ${SERVER} ${CLIENT}
 
 clean:
 	-rm -f certs/*
 	-rm go.mod go.sum
-	$(MAKE) $@ -C protos
 
-protos:
+clean_protos:
+	$(MAKE) clean -C protos
+
+protos: clean_protos
 	$(MAKE) $@ -C protos
 
 ${SERVER}: protos certs

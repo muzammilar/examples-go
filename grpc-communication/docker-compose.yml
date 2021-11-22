@@ -1,13 +1,15 @@
 version: '3.9'
 
 services:
-  prereqs:
+  protobuilder:
     image: geometry/protobuilder:${TAG:-latest}
     build:
       context: ./
       dockerfile: ./docker/protobuilder/Dockerfile
     deploy:
       replicas: 0
+    volumes:
+      - ./:/code
   geomserver:
     build:
       context: ./
@@ -16,7 +18,6 @@ services:
     deploy:
       mode: replicated
       replicas: 3
-      endpoint_mode: vip
   dataserver:
     build:
       context: ./
@@ -25,7 +26,6 @@ services:
     deploy:
       mode: replicated
       replicas: 3
-      endpoint_mode: vip
   geomclient:
     # only gurantees the start order (clients can still start before the server)
     depends_on:

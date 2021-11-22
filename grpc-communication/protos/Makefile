@@ -7,3 +7,5 @@ SUBDIRS := $(wildcard */.)
 $(TOPTARGETS): $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
+
+protos: $(SUBDIRS)

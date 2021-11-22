@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package shape;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/shape";
 
 message ShapeInfo {
@@ -25,9 +27,8 @@ message ShapeInfo {
   Identifier id = 1;
   ShapeType shape = 2;
 
-  repeated Mesurements mesurements = 4;
-
-  google.protobuf.Timestamp timestamp = 3;
+  repeated Mesurement mesurements = 3;
+  google.protobuf.Timestamp timestamp = 4;
 
 }
 

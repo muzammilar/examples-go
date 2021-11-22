@@ -7,7 +7,7 @@ DST_DIR := $(SRC_DIR)
 all: clean protos
 
 protos:
-	protoc -I=$(SRC_DIR) --go_out=$(DST_DIR) $(SRC_DIR)/shapes.proto
+	protoc -I=$(SRC_DIR) --go_out=$(DST_DIR) $(SRC_DIR)/shape.proto
 
 clean:
 	-rm -f $(DST_DIR)/*.pb.go
