@@ -1,4 +1,4 @@
-TOPTARGETS := all clean
+TOPTARGETS := all clean protos
 
 SUBDIRS := $(wildcard */.)
 
@@ -7,5 +7,3 @@ SUBDIRS := $(wildcard */.)
 $(TOPTARGETS): $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
-
-protos: $(SUBDIRS)
