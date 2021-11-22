@@ -9,7 +9,7 @@ services:
     deploy:
       replicas: 0
     volumes:
-      - ./:/code
+      - ./:/geometry
   geomserver:
     build:
       context: ./

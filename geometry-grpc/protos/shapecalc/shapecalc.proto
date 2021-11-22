@@ -2,6 +2,6 @@ syntax = "proto3";
 
 package geometry;
 
-option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/areapb";
+option go_package = "github.com/muzammilar/examples-go/geometry-grpc/protos/areapb";
 
-import "github.com/muzammilar/examples-go/grpc-communication/protos/areapb/areapb.proto";
+import "github.com/muzammilar/examples-go/geometry-grpc/protos/areapb/areapb.proto";

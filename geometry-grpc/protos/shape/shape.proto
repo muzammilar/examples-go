@@ -4,7 +4,7 @@ package shape;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/muzammilar/examples-go/grpc-communication/protos/shape";
+option go_package = "github.com/muzammilar/examples-go/geometry-grpc/protos/shape";
 
 message ShapeInfo {
 
