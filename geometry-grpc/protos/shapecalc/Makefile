@@ -15,6 +15,8 @@ protos:
 			--proto_path=$(IMP_DIR) \
 			--go_opt=paths=source_relative \
 			--go_out=$(DST_DIR) \
+			--go-grpc_opt=paths=source_relative	\
+			--go-grpc_out=$(DST_DIR) \
 		$(SRC_DIR)/shapecalc.proto
 
 clean:

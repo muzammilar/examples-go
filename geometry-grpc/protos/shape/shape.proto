@@ -51,3 +51,13 @@ message Identifier {
   int64 id = 1; // unique ID of a shape
   string name = 2; // name of the shape, can be null or empty, doesn't need to be unique
 }
+
+message PlanarCoordinates {
+  Identifier id = 1;
+  ShapeInfo.ShapeType shape = 2;
+
+  int64 x = 3;  // length is x-axis
+  int64 y = 4;  // width is y-axis
+  int64 z = 5;  // height is z-axis
+
+}

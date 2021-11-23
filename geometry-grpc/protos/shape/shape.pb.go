@@ -382,6 +382,85 @@ func (x *Identifier) GetName() string {
 	return ""
 }
 
+type PlanarCoordinates struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Id    *Identifier         `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Shape ShapeInfo_ShapeType `protobuf:"varint,2,opt,name=shape,proto3,enum=shape.ShapeInfo_ShapeType" json:"shape,omitempty"`
+	X     int64               `protobuf:"varint,3,opt,name=x,proto3" json:"x,omitempty"` // length is x-axis
+	Y     int64               `protobuf:"varint,4,opt,name=y,proto3" json:"y,omitempty"` // width is y-axis
+	Z     int64               `protobuf:"varint,5,opt,name=z,proto3" json:"z,omitempty"` // height is z-axis
+}
+
+func (x *PlanarCoordinates) Reset() {
+	*x = PlanarCoordinates{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_shape_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *PlanarCoordinates) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanarCoordinates) ProtoMessage() {}
+
+func (x *PlanarCoordinates) ProtoReflect() protoreflect.Message {
+	mi := &file_shape_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanarCoordinates.ProtoReflect.Descriptor instead.
+func (*PlanarCoordinates) Descriptor() ([]byte, []int) {
+	return file_shape_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *PlanarCoordinates) GetId() *Identifier {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *PlanarCoordinates) GetShape() ShapeInfo_ShapeType {
+	if x != nil {
+		return x.Shape
+	}
+	return ShapeInfo_UNKNOWN_SHAPE
+}
+
+func (x *PlanarCoordinates) GetX() int64 {
+	if x != nil {
+		return x.X
+	}
+	return 0
+}
+
+func (x *PlanarCoordinates) GetY() int64 {
+	if x != nil {
+		return x.Y
+	}
+	return 0
+}
+
+func (x *PlanarCoordinates) GetZ() int64 {
+	if x != nil {
+		return x.Z
+	}
+	return 0
+}
+
 type ShapeInfo_Mesurement struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -394,7 +473,7 @@ type ShapeInfo_Mesurement struct {
 func (x *ShapeInfo_Mesurement) Reset() {
 	*x = ShapeInfo_Mesurement{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_shape_proto_msgTypes[4]
+		mi := &file_shape_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -407,7 +486,7 @@ func (x *ShapeInfo_Mesurement) String() string {
 func (*ShapeInfo_Mesurement) ProtoMessage() {}
 
 func (x *ShapeInfo_Mesurement) ProtoReflect() protoreflect.Message {
-	mi := &file_shape_proto_msgTypes[4]
+	mi := &file_shape_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -486,12 +565,21 @@ var file_shape_proto_rawDesc = []byte{
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x05, 0x77, 0x69, 0x64, 0x74, 0x68, 0x22, 0x30, 0x0a,
 	0x0a, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69, 0x66, 0x69, 0x65, 0x72, 0x12, 0x0e, 0x0a, 0x02, 0x69,
 	0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52, 0x02, 0x69, 0x64, 0x12, 0x12, 0x0a, 0x04, 0x6e,
-	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x42,
-	0x3e, 0x5a, 0x3c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6d, 0x75,
-	0x7a, 0x61, 0x6d, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x2f, 0x65, 0x78, 0x61, 0x6d, 0x70, 0x6c, 0x65,
-	0x73, 0x2d, 0x67, 0x6f, 0x2f, 0x67, 0x65, 0x6f, 0x6d, 0x65, 0x74, 0x72, 0x79, 0x2d, 0x67, 0x72,
-	0x70, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x73, 0x68, 0x61, 0x70, 0x65, 0x62,
-	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x04, 0x6e, 0x61, 0x6d, 0x65, 0x22,
+	0x92, 0x01, 0x0a, 0x11, 0x50, 0x6c, 0x61, 0x6e, 0x61, 0x72, 0x43, 0x6f, 0x6f, 0x72, 0x64, 0x69,
+	0x6e, 0x61, 0x74, 0x65, 0x73, 0x12, 0x21, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x0b, 0x32, 0x11, 0x2e, 0x73, 0x68, 0x61, 0x70, 0x65, 0x2e, 0x49, 0x64, 0x65, 0x6e, 0x74, 0x69,
+	0x66, 0x69, 0x65, 0x72, 0x52, 0x02, 0x69, 0x64, 0x12, 0x30, 0x0a, 0x05, 0x73, 0x68, 0x61, 0x70,
+	0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x1a, 0x2e, 0x73, 0x68, 0x61, 0x70, 0x65, 0x2e,
+	0x53, 0x68, 0x61, 0x70, 0x65, 0x49, 0x6e, 0x66, 0x6f, 0x2e, 0x53, 0x68, 0x61, 0x70, 0x65, 0x54,
+	0x79, 0x70, 0x65, 0x52, 0x05, 0x73, 0x68, 0x61, 0x70, 0x65, 0x12, 0x0c, 0x0a, 0x01, 0x78, 0x18,
+	0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x01, 0x78, 0x12, 0x0c, 0x0a, 0x01, 0x79, 0x18, 0x04, 0x20,
+	0x01, 0x28, 0x03, 0x52, 0x01, 0x79, 0x12, 0x0c, 0x0a, 0x01, 0x7a, 0x18, 0x05, 0x20, 0x01, 0x28,
+	0x03, 0x52, 0x01, 0x7a, 0x42, 0x3e, 0x5a, 0x3c, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63,
+	0x6f, 0x6d, 0x2f, 0x6d, 0x75, 0x7a, 0x61, 0x6d, 0x6d, 0x69, 0x6c, 0x61, 0x72, 0x2f, 0x65, 0x78,
+	0x61, 0x6d, 0x70, 0x6c, 0x65, 0x73, 0x2d, 0x67, 0x6f, 0x2f, 0x67, 0x65, 0x6f, 0x6d, 0x65, 0x74,
+	0x72, 0x79, 0x2d, 0x67, 0x72, 0x70, 0x63, 0x2f, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x73, 0x2f, 0x73,
+	0x68, 0x61, 0x70, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -507,7 +595,7 @@ func file_shape_proto_rawDescGZIP() []byte {
 }
 
 var file_shape_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_shape_proto_msgTypes = make([]protoimpl.MessageInfo, 5)
+var file_shape_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
 var file_shape_proto_goTypes = []interface{}{
 	(ShapeInfo_QuantityType)(0),   // 0: shape.ShapeInfo.QuantityType
 	(ShapeInfo_ShapeType)(0),      // 1: shape.ShapeInfo.ShapeType
@@ -515,22 +603,25 @@ var file_shape_proto_goTypes = []interface{}{
 	(*Cuboid)(nil),                // 3: shape.Cuboid
 	(*Rectangle)(nil),             // 4: shape.Rectangle
 	(*Identifier)(nil),            // 5: shape.Identifier
-	(*ShapeInfo_Mesurement)(nil),  // 6: shape.ShapeInfo.Mesurement
-	(*timestamppb.Timestamp)(nil), // 7: google.protobuf.Timestamp
+	(*PlanarCoordinates)(nil),     // 6: shape.PlanarCoordinates
+	(*ShapeInfo_Mesurement)(nil),  // 7: shape.ShapeInfo.Mesurement
+	(*timestamppb.Timestamp)(nil), // 8: google.protobuf.Timestamp
 }
 var file_shape_proto_depIdxs = []int32{
 	5, // 0: shape.ShapeInfo.id:type_name -> shape.Identifier
 	1, // 1: shape.ShapeInfo.shape:type_name -> shape.ShapeInfo.ShapeType
-	6, // 2: shape.ShapeInfo.mesurements:type_name -> shape.ShapeInfo.Mesurement
-	7, // 3: shape.ShapeInfo.timestamp:type_name -> google.protobuf.Timestamp
+	7, // 2: shape.ShapeInfo.mesurements:type_name -> shape.ShapeInfo.Mesurement
+	8, // 3: shape.ShapeInfo.timestamp:type_name -> google.protobuf.Timestamp
 	5, // 4: shape.Cuboid.id:type_name -> shape.Identifier
 	5, // 5: shape.Rectangle.id:type_name -> shape.Identifier
-	0, // 6: shape.ShapeInfo.Mesurement.name:type_name -> shape.ShapeInfo.QuantityType
-	7, // [7:7] is the sub-list for method output_type
-	7, // [7:7] is the sub-list for method input_type
-	7, // [7:7] is the sub-list for extension type_name
-	7, // [7:7] is the sub-list for extension extendee
-	0, // [0:7] is the sub-list for field type_name
+	5, // 6: shape.PlanarCoordinates.id:type_name -> shape.Identifier
+	1, // 7: shape.PlanarCoordinates.shape:type_name -> shape.ShapeInfo.ShapeType
+	0, // 8: shape.ShapeInfo.Mesurement.name:type_name -> shape.ShapeInfo.QuantityType
+	9, // [9:9] is the sub-list for method output_type
+	9, // [9:9] is the sub-list for method input_type
+	9, // [9:9] is the sub-list for extension type_name
+	9, // [9:9] is the sub-list for extension extendee
+	0, // [0:9] is the sub-list for field type_name
 }
 
 func init() { file_shape_proto_init() }
@@ -588,6 +679,18 @@ func file_shape_proto_init() {
 			}
 		}
 		file_shape_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*PlanarCoordinates); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_shape_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*ShapeInfo_Mesurement); i {
 			case 0:
 				return &v.state
@@ -606,7 +709,7 @@ func file_shape_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_shape_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   5,
+			NumMessages:   6,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

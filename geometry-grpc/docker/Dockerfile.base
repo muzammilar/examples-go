@@ -25,6 +25,7 @@ ARG TAG
 FROM protobuilder AS certbuilder
 RUN apk add --no-cache openssl
 
+
 ###############################################
 # build base
 ###############################################

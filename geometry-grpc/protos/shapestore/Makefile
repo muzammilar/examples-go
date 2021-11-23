@@ -15,7 +15,9 @@ protos:
 			--proto_path=$(IMP_DIR) \
 			--go_opt=paths=source_relative \
 			--go_out=$(DST_DIR) \
-		$(SRC_DIR)/shapegen.proto
+			--go-grpc_opt=paths=source_relative	\
+			--go-grpc_out=$(DST_DIR) \
+		$(SRC_DIR)/shapestore.proto
 
 clean:
 	-rm -f *.pb.go
