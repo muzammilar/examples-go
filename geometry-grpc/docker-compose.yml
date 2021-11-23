@@ -4,7 +4,8 @@ services:
   protobuilder:
     build:
       context: ./
-      dockerfile: ./docker/protobuilder/Dockerfile
+      dockerfile: ./docker/Dockerfile.base
+      target: protobuilder # stop after building this target
     image: geometry/protobuilder:${TAG:-latest}
     # make protos and also the gomod file
     volumes:
