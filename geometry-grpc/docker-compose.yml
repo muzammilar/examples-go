@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+  # protobuilder service can be used to (re)build protos
   protobuilder:
     build:
       context: ./
@@ -12,6 +13,20 @@ services:
       - ./:/geometry
     working_dir: /geometry
     command: bash -c "make gomodule && make protos"
+    deploy:
+      replicas: 0
+  # certbuilder service can be used to debug cert building
+  certbuilder:
+    build:
+      context: ./
+      dockerfile: ./docker/Dockerfile.base
+      target: certbuilder # stop after building this target
+    image: geometry/certbuilder:${TAG:-latest}
+    # make protos and also the gomod file
+    volumes:
+      - ./:/geometry
+    working_dir: /geometry
+    command: make certs
     deploy:
       replicas: 0
   geomserver:

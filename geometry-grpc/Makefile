@@ -11,15 +11,17 @@ SERVER_VERSION := ${DEFAULT_VERSION}
 CLIENT_VERSION := ${DEFAULT_VERSION}
 
 # Applications
-SERVER=geomserver
+GEOMSERVER=geomserver
+DATASERVER=dataserver
 CLIENT=geomclient
 
 .PHONY: all clean certs gomodule protos certs clean_protos clean_gomodule
 
-all: clean protos certs ${SERVER} ${CLIENT}
+all: clean protos certs ${DATASERVER} ${GEOMSERVER} ${CLIENT}
 
 clean:
-	-rm -f certs/*
+	-rm -f ${DATASERVER}
+	-rm -f ${GEOMETRYSERVER}
 
 clean_protos:
 	$(MAKE) clean -C protos
@@ -27,8 +29,14 @@ clean_protos:
 protos: clean_protos
 	$(MAKE) $@ -C protos
 
-${SERVER}: protos certs
+${DATASERVER}: certs
 	go build -ldflags "-X main.version=${SERVER_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
+
+${GEOMSERVER}: certs
+	go build -ldflags "-X main.version=${SERVER_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
+
+${CLIENT}: certs
+	go build -ldflags "-X main.version=${CLIENT_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
 
 test:
 # check for raceconditions
@@ -56,8 +64,11 @@ gomodule: clean_gomodule gomodinit gomodtidy
 goget:
 	go get -d -v ./...
 
+clean_certs:
+	-rm -f certs/*
+
 # source: https://github.com/denji/golang-tls
-certs:
+certs: clean_certs
 	mkdir -p certs
 # Key considerations for algorithm "ECDSA" (X25519 || ≥ secp384r1)
 	openssl ecparam -genkey -name secp384r1 -out certs/server.grpc.key
