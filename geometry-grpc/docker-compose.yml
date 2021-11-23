@@ -2,14 +2,17 @@ version: '3.9'
 
 services:
   protobuilder:
-    image: geometry/protobuilder:${TAG:-latest}
     build:
       context: ./
       dockerfile: ./docker/protobuilder/Dockerfile
-    deploy:
-      replicas: 0
+    image: geometry/protobuilder:${TAG:-latest}
+    # make protos and also the gomod file
     volumes:
       - ./:/geometry
+    working_dir: /geometry
+    command: bash -c "make gomodule && make protos"
+    deploy:
+      replicas: 0
   geomserver:
     build:
       context: ./

@@ -2,26 +2,28 @@ syntax = "proto3";
 
 package shape;
 
-import "google/protobuf/timestamp.proto";
-
 option go_package = "github.com/muzammilar/examples-go/geometry-grpc/protos/shape";
+
+import "google/protobuf/timestamp.proto";
 
 message ShapeInfo {
 
   enum QuantityType {
+    UNKNOWN_QUANTITY = 0;
     AREA = 1;
     VOLUME = 2;
     PERIMETER = 3;
   }
 
   enum ShapeType {
+    UNKNOWN_SHAPE = 0;
     RECTANGLE = 1;
     CUBE = 2;
   }
 
   message Mesurement {
     QuantityType name = 1;
-    float64 value = 2;
+    float value = 2;
   }
 
   Identifier id = 1;
@@ -46,6 +48,6 @@ message Rectangle {
 }
 
 message Identifier {
-  int id = 1; // unique ID of a shape
+  int64 id = 1; // unique ID of a shape
   string name = 2; // name of the shape, can be null or empty, doesn't need to be unique
 }

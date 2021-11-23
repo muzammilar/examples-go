@@ -3,9 +3,14 @@
 A basic golang gRPC example (with server certificates).
 
 ```sh
-# Build the protobufs (and generate the *.pb.go files)
+# Build the protobufs (and generate the *.pb.go files).
+# The second command will run "make protos" in the container as well as recreate go module/update dependencies
 docker-compose up --detach --build protobuilder
-docker-compose run --rm --workdir="/geometry" protobuilder "make protos"
+docker-compose run --rm protobuilder
+# To access the container itself, use any of the following command(s)
+docker-compose run --rm protobuilder bash
+docker-compose run --rm protobuilder sh
+docker-compose run --rm protobuilder /bin/sh
 
 # Run the grpc servers and clients
 docker-compose up --build

@@ -14,13 +14,12 @@ CLIENT_VERSION := ${DEFAULT_VERSION}
 SERVER=geomserver
 CLIENT=geomclient
 
-.PHONY: all clean certs gomodule protos certs clean_protos
+.PHONY: all clean certs gomodule protos certs clean_protos clean_gomodule
 
-all: clean gomodule protos certs ${SERVER} ${CLIENT}
+all: clean protos certs ${SERVER} ${CLIENT}
 
 clean:
 	-rm -f certs/*
-	-rm go.mod go.sum
 
 clean_protos:
 	$(MAKE) clean -C protos
@@ -40,11 +39,19 @@ test:
 lint:
 	golint ./...
 
-gomodule:
+# clean the go module
+clean_gomodule:
+	-rm -f go.mod go.sum
+
 # initialize module
+gomodinit:
 	go mod init ${GOMODULENAME}
+
 # add module requirements and sums
+gomodtidy:
 	go mod tidy
+
+gomodule: clean_gomodule gomodinit gomodtidy
 
 goget:
 	go get -d -v ./...
@@ -56,5 +63,5 @@ certs:
 	openssl ecparam -genkey -name secp384r1 -out certs/server.grpc.key
 # Generation of self-signed(x509) public key (PEM-encodings .pem|.crt) based on the private (.key)
 	openssl req -new -x509 -sha256 \
-	-key server.grpc.key -out server.grpc.crt -days 3650 \
+	-key certs/server.grpc.key -out certs/server.grpc.crt -days 3650 \
 	-subj "/C=US/ST=Denial/L=Springfield/O=Dis/CN=server.grpc"

@@ -1,0 +1,7 @@
+syntax = "proto3";
+
+package shapegen;
+
+option go_package = "github.com/muzammilar/examples-go/geometry-grpc/protos/shapegen";
+
+import "shape/shape.proto";
