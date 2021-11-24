@@ -1,8 +1,12 @@
+/*
+	The package grpcserver provides useful set of function to create grpc servers
+*/
 package grpcserver
 
 import (
 	"time"
 
+	"github.com/muzammilar/examples-go/geometry-grpc/pkg/serverstats"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
@@ -20,7 +24,10 @@ func CreateServerWithStatsAndTLS(certFile string, keyFile string, l *logrus.Logg
 	}
 	opts = append(opts, grpc.Creds(creds))
 
-	// TODO: Stats
+	// Stats (by default no stats handler is configured)
+	// Note: Stats handlers can be very expensive and slow down grpc streams (especially for small messages)
+	statsHandler := serverstats.NewGRPCStats(l)
+	opts = append(opts, grpc.StatsHandler(statsHandler))
 
 	return grpc.NewServer(opts...)
 
