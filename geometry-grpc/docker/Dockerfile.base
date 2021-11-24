@@ -17,15 +17,17 @@ RUN apk add --no-cache git protobuf protobuf-dev
 # Install gRPC go packages
 RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v${PROTOC_GEN_GO_VERSION}
 RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v${PROTOC_GEN_GO_GRPC_VERSION}
+LABEL Name=geometry/protobuilder Version=${TAG}
+
 
 ###############################################
-# build certs
+# build base image with all the services
 ###############################################
+FROM protobuilder AS baseimage
 ARG TAG
-FROM protobuilder AS certbuilder
 RUN apk add --no-cache openssl
-
-
-###############################################
-# build base
-###############################################
+# make gomodule if it doesn't exist
+# RUN make gomodule
+# make everything (including certs and protos)
+# RUN make
+LABEL Name=geometry/base Version=${TAG}

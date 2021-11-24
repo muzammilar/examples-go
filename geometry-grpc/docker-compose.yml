@@ -14,46 +14,67 @@ services:
     working_dir: /geometry
     command: bash -c "make gomodule && make protos"
     deploy:
-      replicas: 0
-  # certbuilder service can be used to debug cert building
-  certbuilder:
+      mode: replicated
+      replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
+  # basebuilder service can be used to debug the builds
+  basebuilder:
     build:
       context: ./
       dockerfile: ./docker/Dockerfile.base
-      target: certbuilder # stop after building this target
-    image: geometry/certbuilder:${TAG:-latest}
-    # make protos and also the gomod file
+      target: baseimage # stop after building this target
+    image: geometry/base:${TAG:-latest}
     volumes:
       - ./:/geometry
     working_dir: /geometry
-    command: make certs
+    command: make
     deploy:
-      replicas: 0
+      mode: replicated
+      replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
+
+  # grpc server for computation
   geomserver:
+    hostname: geomserver.geometry
     build:
       context: ./
-      dockerfile: ./docker/geomserver/Dockerfile
-    image: geometry/server:${TAG:-latest}
+      dockerfile: ./docker/Dockerfile.geomserver
+    image: geometry/geomserver:${TAG:-latest}
+    depends_on:
+      - basebuilder
     deploy:
-      mode: replicated
-      replicas: 3
+      mode: global
+    networks:
+      - geomnetwork
+
+  # grpc server that generates the data
   dataserver:
+    hostname: geomserver.geometry
     build:
       context: ./
-      dockerfile: ./docker/dataserver/Dockerfile
+      dockerfile: ./docker/Dockerfile.dataserver
     image: geometry/dataserver:${TAG:-latest}
+    depends_on:
+      - basebuilder
     deploy:
-      mode: replicated
-      replicas: 3
-  geomclient:
+      mode: global
+    networks:
+      - geomnetwork
+
+  # client that connects to both servers
+  client:
     # only gurantees the start order (clients can still start before the server)
     depends_on:
       - geomserver
       - dataserver
     build:
       context: ./
-      dockerfile: ./docker/geomclient/Dockerfile
+      dockerfile: ./docker/Dockerfile.client
     image: geometry/client:${TAG:-latest}
     deploy:
       mode: replicated
       replicas: 6
+    networks:
+      - geomnetwork
+
+networks:
+  geomnetwork:
+    driver: bridge

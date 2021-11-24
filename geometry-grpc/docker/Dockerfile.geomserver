@@ -1,0 +1,14 @@
+ARG TAG=latest
+
+#server final stage
+FROM alpine:latest as geomserver
+# ARG are reset after every FROM statement, so need redeclaration
+ARG TAG
+WORKDIR /geometry
+RUN apk --no-cache add ca-certificates
+# Since docker-compose currently doesn't support copying from local images, use the host OS to copy files instead
+#COPY --from=geometry/base:${TAG} /geometry/build/geomserver /geometry/geomserver
+#COPY --from=geometry/base:${TAG} /geometry/certs /geometry/certs
+COPY ./build/geomserver /geometry/geomserver
+COPY ./certs /geometry/certs
+ENTRYPOINT /geometry/geomserver

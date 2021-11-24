@@ -13,15 +13,16 @@ CLIENT_VERSION := ${DEFAULT_VERSION}
 # Applications
 GEOMSERVER=geomserver
 DATASERVER=dataserver
-CLIENT=geomclient
+CLIENT=client
 
-.PHONY: all clean certs gomodule protos certs clean_protos clean_gomodule
+.PHONY: all clean certs gomodule protos clean_certs clean_protos clean_gomodule
 
 all: clean protos certs ${DATASERVER} ${GEOMSERVER} ${CLIENT}
 
 clean:
-	-rm -f ${DATASERVER}
-	-rm -f ${GEOMETRYSERVER}
+	-rm -f build/${DATASERVER}
+	-rm -f build/${GEOMSERVER}
+	-rm -f build/${CLIENT}
 
 clean_protos:
 	$(MAKE) clean -C protos
@@ -29,14 +30,14 @@ clean_protos:
 protos: clean_protos
 	$(MAKE) $@ -C protos
 
-${DATASERVER}: certs
-	go build -ldflags "-X main.version=${SERVER_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
+${DATASERVER}:
+	go build -ldflags "-X main.version=${SERVER_VERSION}" -o build/${DATASERVER} ./cmd/dataserver/dataserver.go
 
-${GEOMSERVER}: certs
-	go build -ldflags "-X main.version=${SERVER_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
+${GEOMSERVER}:
+	go build -ldflags "-X main.version=${SERVER_VERSION}" -o build/${GEOMSERVER} ./cmd/geomserver/geomserver.go
 
-${CLIENT}: certs
-	go build -ldflags "-X main.version=${CLIENT_VERSION} main.commit=${COMMIT}" -o  ./cmd/pprinter/pprinter.go
+${CLIENT}:
+	go build -ldflags "-X main.version=${CLIENT_VERSION}" -o build/${CLIENT} ./cmd/client/client.go
 
 test:
 # check for raceconditions
