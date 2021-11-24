@@ -17,7 +17,7 @@ CLIENT=client
 
 .PHONY: all clean certs gomodule protos clean_certs clean_protos clean_gomodule
 
-all: clean protos certs ${DATASERVER} ${GEOMSERVER} ${CLIENT}
+all: clean gomodtidy protos certs ${DATASERVER} ${GEOMSERVER} ${CLIENT}
 
 clean:
 	-rm -f build/${DATASERVER}

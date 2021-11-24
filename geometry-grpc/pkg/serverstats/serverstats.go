@@ -1,0 +1,8 @@
+package serverstats
+
+var (
+
+)
+
+
+Initialize()

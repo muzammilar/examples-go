@@ -7,13 +7,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"sync"
 
 	"github.com/muzammilar/examples-go/geometry-grpc/protos/shape"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 )
@@ -62,24 +60,6 @@ func StartServer(wg *sync.WaitGroup, addr string, ctx context.Context, logger *l
 		logger.Warn("HTTP Server failed to listen and serve: %#v", err)
 	}
 	// server shutdown is complete
-}
-
-/*
- * Public Functions
- */
-
-// PromServer takes an address of a server (as a string) and starts serving a prometheus server on that address
-func PromServer(addr string) {
-	// Expose the registered metrics via HTTP.
-	http.Handle("/metrics", promhttp.HandlerFor(
-		prometheus.DefaultGatherer,
-		promhttp.HandlerOpts{
-			// Opt into OpenMetrics to support exemplars.
-			EnableOpenMetrics: true,
-		},
-	))
-	log.Fatal(http.ListenAndServe(addr, nil))
-
 }
 
 /*
