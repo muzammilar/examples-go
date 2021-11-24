@@ -1,3 +1,7 @@
+/*
+ * The package implements a basic examle of an http server
+ */
+
 package httpserver
 
 /*
@@ -66,12 +70,14 @@ func StartServer(wg *sync.WaitGroup, addr string, ctx context.Context, logger *l
  * Private Functions
  */
 
+// An example of handling a basic hello world response
 func hellogrpc(w http.ResponseWriter, req *http.Request) {
 	fmt.Fprintf(w, "Hello gRPC!\n")
 }
 
+// An example of handling a basic hello world response with json (and protobufs)
 func hellojson(w http.ResponseWriter, req *http.Request) {
-	// send a random structure
+	// create a random cuboid structure
 	cuboid := &shape.Cuboid{
 		Id: &shape.Identifier{
 			Id: int64(rand.Uint32()),

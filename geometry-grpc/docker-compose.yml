@@ -60,15 +60,15 @@ services:
       - geomnetwork
 
   # client that connects to both servers
-  client:
+  goclient:
     # only gurantees the start order (clients can still start before the server)
     depends_on:
       - geomserver
       - dataserver
     build:
       context: ./
-      dockerfile: ./docker/Dockerfile.client
-    image: geometry/client:${TAG:-latest}
+      dockerfile: ./docker/Dockerfile.goclient
+    image: geometry/goclient:${TAG:-latest}
     deploy:
       mode: replicated
       replicas: 6

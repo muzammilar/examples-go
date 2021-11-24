@@ -13,16 +13,16 @@ CLIENT_VERSION := ${DEFAULT_VERSION}
 # Applications
 GEOMSERVER=geomserver
 DATASERVER=dataserver
-CLIENT=client
+GOCLIENT=goclient
 
 .PHONY: all clean certs gomodule protos clean_certs clean_protos clean_gomodule
 
-all: clean gomodtidy protos certs ${DATASERVER} ${GEOMSERVER} ${CLIENT}
+all: clean gomodtidy protos certs ${DATASERVER} ${GEOMSERVER} ${GOCLIENT}
 
 clean:
 	-rm -f build/${DATASERVER}
 	-rm -f build/${GEOMSERVER}
-	-rm -f build/${CLIENT}
+	-rm -f build/${GOCLIENT}
 
 clean_protos:
 	$(MAKE) clean -C protos
@@ -36,8 +36,8 @@ ${DATASERVER}:
 ${GEOMSERVER}:
 	go build -ldflags "-X main.version=${SERVER_VERSION}" -o build/${GEOMSERVER} ./cmd/geomserver/geomserver.go
 
-${CLIENT}:
-	go build -ldflags "-X main.version=${CLIENT_VERSION}" -o build/${CLIENT} ./cmd/client/client.go
+${GOCLIENT}:
+	go build -ldflags "-X main.version=${CLIENT_VERSION}" -o build/${GOCLIENT} ./cmd/client/client.go
 
 test:
 # check for raceconditions

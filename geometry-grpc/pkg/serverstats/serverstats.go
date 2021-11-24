@@ -1,3 +1,6 @@
+/*
+	The serverstats package implements the grpc/stats.Handler interface and the related read-only functions
+*/
 package serverstats
 
 import (
@@ -13,6 +16,7 @@ type GRPCStats struct {
 	logger *logrus.Logger
 }
 
+// Create a new GRPCStats struct. Note that these fields can not be updated/modified in the stats.Handler interface functions
 func NewGRPCStats(l *logrus.Logger) GRPCStats {
 	return GRPCStats{
 		logger: l,

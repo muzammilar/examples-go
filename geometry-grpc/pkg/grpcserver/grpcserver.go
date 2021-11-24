@@ -4,6 +4,9 @@
 package grpcserver
 
 import (
+	"fmt"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/muzammilar/examples-go/geometry-grpc/pkg/serverstats"
@@ -12,6 +15,7 @@ import (
 	"google.golang.org/grpc/credentials"
 )
 
+// CreateServerWithStatsAndTLS creates a simple grpc server with TLS and stats collection enabled.
 func CreateServerWithStatsAndTLS(certFile string, keyFile string, l *logrus.Logger) *grpc.Server {
 
 	var opts []grpc.ServerOption
@@ -33,6 +37,8 @@ func CreateServerWithStatsAndTLS(certFile string, keyFile string, l *logrus.Logg
 
 }
 
+// ShutDownServerWithTimeout provides a user with a way to shutdown the server safely (if possible).
+// It first tries graceful shutdown, if that fails, a shutdown is forced after timeout
 func ShutDownServerWithTimeout(s *grpc.Server, t time.Duration) {
 
 	// Have channel to track graceful shutdown
@@ -61,4 +67,29 @@ func ShutDownServerWithTimeout(s *grpc.Server, t time.Duration) {
 			time.Sleep(t / 50)
 		}
 	}
+}
+
+// TCPListener creates a TCP listener and returns it
+func TCPListener(host string, port int) *net.TCPListener {
+	// create a tcp list
+	tcpAddr := net.JoinHostPort(host, strconv.Itoa(port))
+	// Generally panic is not a good way to handle errors. Allow it cos PoC
+	lis, err := net.Listen("tcp", tcpAddr)
+	if err != nil {
+		panic(err)
+	}
+
+	// panic if it's not a TCP listener
+	/*
+		switch nLis := lis.(type) {
+		case *net.TCPListener:
+			return nLis
+		default:
+			panic(fmt.Errorf("Listener %+v can not be converted to `*net.Listener`", lis))
+		}
+	*/
+	if tLis, ok := lis.(*net.TCPListener); ok {
+		return tLis
+	}
+	panic(fmt.Errorf("Listener %+v can not be converted to `*net.Listener`", lis))
 }
