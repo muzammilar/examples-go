@@ -21,4 +21,6 @@
 **/obj
 **/secrets.dev.yaml
 **/values.dev.yaml
+**/server.grpc.cert
+**/server.grpc.key
 README.md

@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package shapestore;
+
+option go_package = "github.com/muzammilar/examples-go/geometry-grpc/protos/shapestore";
+
+import "shape/shape.proto";
+
+// imported from protobuf-dev
+import "google/protobuf/empty.proto";
+
+service Store {
+    // A client-to-server streaming RPC.
+    //
+    // Accepts a stream of Points on a route being traversed, returning a
+    // RouteSummary when traversal is completed.
+    rpc Cuboid(stream shape.Cuboid) returns (google.protobuf.Empty) {}
+
+    // A Bidirectional streaming RPC.
+    //
+    // Accepts a stream of shape.Identifier and returns it to the client.
+    rpc AsyncReplay(stream shape.Identifier) returns (stream shape.Identifier) {}
+
+
+}
+
+service Generator {
+    // A server-to-client streaming RPC.
+    //
+    // Generate a Cuboid with Random Dimensions
+    rpc Cuboid(google.protobuf.Empty) returns (stream shape.Cuboid) {}
+}
