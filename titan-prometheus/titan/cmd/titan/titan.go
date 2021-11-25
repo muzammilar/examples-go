@@ -30,9 +30,9 @@ var (
 	commit string
 	// cli flags
 	addr              string
-	uniformDomain     float64
-	normDomain        float64
-	normMean          float64
+	uniformDomain     *float64
+	normDomain        *float64
+	normMean          *float64
 	oscillationPeriod *time.Duration
 )
 
@@ -41,10 +41,11 @@ var (
 // ideally flags should be parsed in main and not init, but for sake of example, we'll use `init`
 func init() {
 	// flags
+	// Note: since addr is assigned the value at init time, it will never get the parsed value. It will always get default.
 	addr = *flag.String("listen-address", ":8080", "The address to listen on for HTTP requests.")
-	uniformDomain = *flag.Float64("uniform.domain", 0.0002, "The domain for the uniform distribution.")
-	normDomain = *flag.Float64("normal.domain", 0.0002, "The domain for the normal distribution.")
-	normMean = *flag.Float64("normal.mean", 0.00001, "The mean for the normal distribution.")
+	uniformDomain = flag.Float64("uniform.domain", 0.0002, "The domain for the uniform distribution.")
+	normDomain = flag.Float64("normal.domain", 0.0002, "The domain for the normal distribution.")
+	normMean = flag.Float64("normal.mean", 0.00001, "The mean for the normal distribution.")
 	oscillationPeriod = flag.Duration("oscillation-period", 10*time.Minute, "The duration of the rate oscillation period.")
 	flag.Parse()
 }
@@ -56,7 +57,7 @@ func main() {
 	// Start a stats and metrics aggregation application
 
 	// Start Titan to generate metrics (has go routines)
-	titan.StartTitan(*oscillationPeriod, uniformDomain, normDomain, normMean)
+	titan.StartTitan(*oscillationPeriod, *uniformDomain, *normDomain, *normMean)
 
 	promstats.PromServer(addr)
 }
