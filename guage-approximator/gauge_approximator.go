@@ -95,14 +95,21 @@ func MetricsAggregator(ch <-chan *Metric, buckets uint64, bucketIntvl uint64) {
 func main() {
 
 	// Parse flags; skipping error checking for now
-	numBucketsPtr := *flag.Uint64("buckets", 3, "Number of buckets to store historical data.")
-	intervalSecPtr := *flag.Uint64("bucketinterval", 15, "The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used.")
-	numGenerators := flag.Uint("generators", 3, "Number of metric generator routines.")
-	generatorSleepStr := *flag.String("geninterval", "50ms", "The time duration, as a string, that a generator waits for between sending new metrics to the aggregator.")
-	generatorStatsFreq := *flag.Uint64("genstatsfreq", 500, "The number of metrics generated after which a generator prints its own counters (about number of metrics generated and successfully sent).")
-	channelSizeUint := *flag.Uint("chansize", 1000, "The size of the channel used to pass metrics from generators to aggregator.")
+	numBucketsPtr := flag.Uint64("buckets", 3, "Number of buckets to store historical data.")
+	intervalSecPtr := flag.Uint64("bucketinterval", 15, "The size of the time interval (in seconds) for which the average is computed, i.e. a single bucket is used.")
+	numGeneratorsPtr := flag.Uint("generators", 3, "Number of metric generator routines.")
+	generatorSleepStrPtr := flag.String("geninterval", "50ms", "The time duration, as a string, that a generator waits for between sending new metrics to the aggregator.")
+	generatorStatsFreqPtr := flag.Uint64("genstatsfreq", 500, "The number of metrics generated after which a generator prints its own counters (about number of metrics generated and successfully sent).")
+	channelSizeUintPtr := flag.Uint("chansize", 1000, "The size of the channel used to pass metrics from generators to aggregator.")
 
 	flag.Parse()
+
+	// get the values from pointers
+	numBuckets := *numBucketsPtr
+	intervalSec := *intervalSecPtr
+	generatorSleepStr := *generatorSleepStrPtr
+	generatorStatsFreq := *generatorStatsFreqPtr
+	channelSizeUint := *channelSizeUintPtr
 
 	// constants
 	var channelSize int = int(channelSizeUint)
@@ -116,10 +123,10 @@ func main() {
 	ch = make(chan *Metric, channelSize)
 
 	// start the metrics aggregator routine
-	go MetricsAggregator(ch, numBucketsPtr, intervalSecPtr)
+	go MetricsAggregator(ch, numBuckets, intervalSec)
 
 	// start metrics generator routine
-	for i := 0; i < int(*numGenerators); i++ {
+	for i := 0; i < int(*numGeneratorsPtr); i++ {
 		go MetricGenerator(ch, i, generatorStatsFreq, generatorSleep)
 	}
 
