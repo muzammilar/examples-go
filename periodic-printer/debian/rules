@@ -7,7 +7,7 @@ endif
 # use verbose logging to easily debug builds
 DH_VERBOSE = 1
 
-# use dh-systemd for creating a systemd service and dh-sysuser for creating a user (when package is installed)
+# dh-sysuser for creating a user (when package is installed)
 %:
 	dh $@ --with sysuser
 
