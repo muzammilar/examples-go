@@ -1,0 +1,3 @@
+[submodule "ext/geomrpc"]
+	path = ext/geomrpc
+	url = https://github.com/muzammilar/geomrpc.git
