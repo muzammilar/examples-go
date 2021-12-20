@@ -19,16 +19,16 @@ git submodule status
 ## Updating a submodule
 ```sh
 # Update using the path
-git submodule update --remote geomrpc
+git submodule update --remote ext/geomrpc
 
 # Change branch or tag (and check status)
 git submodule set-branch --branch master ext/geomrpc
-git submodule update --remote geomrpc
+git submodule update --remote ext/geomrpc
 git submodule status
 
 # Change branch to tag (and check status)
 git submodule set-branch --branch 0.0.1 ext/geomrpc
-git submodule update --remote geomrpc
+git submodule update --remote ext/geomrpc
 git submodule status
 ```
 
