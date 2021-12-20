@@ -35,17 +35,26 @@ git submodule status
 ## Deteling a submodule
 
 ```sh
+# Remove the submodule and update the .gitsubmodules file
+git rm -r ext/geomrpc
+# Commit your changes
+# Remove the module data
+rm -rf .git/modules/ext/geomrpc
+# Update the .git/config
+git config -f .git/config --remove-section "submodule.ext/geomrpc" 2> /dev/null
+
+## Alternatively
 # Remove config entries:
-git config -f .git/config --remove-section submodule.$submodulename
-git config -f .gitmodules --remove-section submodule.$submodulename
+#git config -f .git/config --remove-section submodule.$submodulename
+#git config -f .gitmodules --remove-section submodule.$submodulename
 
 # Remove directory from index:
-git rm --cached $submodulepath
+#git rm --cached $submodulepath
 
 # Commit
 #Delete unused files:
-rm -rf $submodulepath
-rm -rf .git/modules/$submodulename
+#rm -rf $submodulepath
+#rm -rf .git/modules/$submodulename
 
 # Please note: $submodulepath doesn't contain leading or trailing slashes.
 ```
