@@ -1,0 +1,46 @@
+version: '3.9'
+
+services:
+  # Kafka Producers
+  kafkaproducer:
+    image: srm-producer
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      target: producer
+    deploy:
+      mode: replicated
+      replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
+  # Kafka Consumers
+  kafkaconsumer:
+    image: srm-consumer
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      target: consumer
+    deploy:
+      mode: replicated
+      replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
+  # Zookeeper Service - Zookeeper is needed (as of Jan 2022) - but soon it won't be needed
+  zookeeper:
+    image: zookeeper:3.7
+  # Kafka container
+  kafka:
+    image: wurstmeister/kafka:2.13-2.8.1
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+      # TOPICS: `test` will have 13 partitions and 1 replica
+      KAFKA_CREATE_TOPICS: "test:13:1"
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  # Prometheus
+  prometheus:
+    image: "prom/prometheus"
+    hostname: prometheus.svc
+    volumes:
+      - ./prometheus/config/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090 # http port
