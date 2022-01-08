@@ -8,7 +8,11 @@ package promstats
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
+	"time"
+
+	"github.com/muzammilar/examples-go/titan-prometheus/titan/pkg/uptime"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -25,6 +29,11 @@ var (
 
 // Custom init function of the package that can takes in some arguments
 func Init(normMean float64, normDomain float64) {
+
+	// create a new random generator source
+	randSouce := rand.NewSource(time.Now().UnixNano()) // NewSource is not thread safe
+	randGen := rand.New(randSouce)
+
 	// Create a summary to track fictional interservice RPC latencies for three
 	// distinct services with different latency distributions. These services are
 	// differentiated via a "service" label.
@@ -51,6 +60,28 @@ func Init(normMean float64, normDomain float64) {
 	prometheus.MustRegister(RpcDurationsHistogram)
 	// Add Go module build info.
 	prometheus.MustRegister(prometheus.NewBuildInfoCollector())
+
+	// Add a CounterFunc to capture uptime (use Register to avoid panic)
+	if err := prometheus.Register(uptime.UptimeCounterFunc("titan")); err != nil {
+		log.Fatal(`Unable to register CounterFunc 'uptime_seconds' for titan.`)
+	}
+
+	// Add a GuageFunc to capture some random value
+	if err := prometheus.Register(
+		prometheus.NewGaugeFunc(
+			prometheus.GaugeOpts{
+				Namespace:   "random",
+				Name:        "number",
+				Help:        "A Random Number between 50 and 100.",
+				ConstLabels: prometheus.Labels{"source": "not-thread-safe"},
+			},
+			func() float64 {
+				return float64(randGen.Intn(50) + 50)
+			},
+		),
+	); err != nil {
+		log.Fatal(`Unable to register GaugeFunc 'random_number'  with labels {source="not-thread-safe"}.`)
+	}
 }
 
 /*

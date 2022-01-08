@@ -52,7 +52,7 @@ func init() {
 
 func main() {
 	// custom initializations
-	promstats.Init(normMean, normDomain)
+	promstats.Init(*normMean, *normDomain)
 
 	// Start a stats and metrics aggregation application
 
