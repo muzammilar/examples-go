@@ -32,8 +32,8 @@ services:
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
-      # TOPICS: `test` will have 13 partitions and 1 replica
-      KAFKA_CREATE_TOPICS: "test:13:1"
+      # TOPICS: `trees` will have 13 partitions and 1 replica, `test` will have 7 partitions and 1 replica
+      KAFKA_CREATE_TOPICS: "trees:13:1,test:7:1"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
   # Prometheus
   prometheus:
