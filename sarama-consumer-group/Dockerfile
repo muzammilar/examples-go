@@ -9,8 +9,6 @@ FROM golang:${GO_VERSION}-alpine AS producerbuilder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
 COPY ./producer .
-RUN go mod init
-RUN go get -d -v ./...
 RUN go install -v ./...
 
 ARG GO_VERSION
@@ -31,7 +29,7 @@ RUN go install -v ./...
 #producer
 FROM alpine:latest AS producer
 RUN apk --no-cache add ca-certificates
-COPY --from=producerbuilder /go/bin/app /saramaproducer
+COPY --from=producerbuilder /go/bin/producer /saramaproducer
 CMD ./saramaproducer
 
 #consumer
