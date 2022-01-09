@@ -48,6 +48,9 @@ func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-produce
 
 	// validate brokers and topics and other input configs (if needed). Skipping since it's a proof-of-concept
 
+	// start the metrics handler
+	startMetricsCollector()
+
 	// create a context
 	ctx, cancel := context.WithCancel(context.Background())
 

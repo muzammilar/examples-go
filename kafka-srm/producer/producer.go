@@ -61,6 +61,9 @@ func startSyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, syncprod
 
 producerLoop:
 	for {
+		// sleep for a while
+		time.Sleep(DefaultMessageSendIntervalMs * time.Millisecond)
+
 		// get a random user id
 		userId := UserIDMin + randGen.Intn(UserIDRange)
 
@@ -134,6 +137,8 @@ func startAsyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, asyncpr
 
 producerLoop:
 	for {
+		// sleep for a while
+		time.Sleep(DefaultMessageSendIntervalMs * time.Millisecond)
 		// get a random user id
 		userId := UserIDMin + randGen.Intn(UserIDRange)
 		// make a message
@@ -191,6 +196,8 @@ func producerConfig(logger *logrus.Logger) *sarama.Config {
 	config.Producer.RequiredAcks = sarama.WaitForLocal // wait for local commit to succeed
 	config.Producer.Return.Errors = true               // return the errors via a channel to the user
 	config.Producer.Return.Successes = true            // It must always be true for sync producer, for async producer, it needs a channel read
+
+	config.MetricRegistry = MetricsRegistry // alternatively we can use metrics.DefaultRegistry
 
 	return config
 }

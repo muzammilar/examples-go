@@ -9,6 +9,8 @@ FROM golang:${GO_VERSION}-alpine AS producerbuilder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
 COPY ./producer .
+# add missing dependencies
+RUN go mod tidy
 RUN go install -v ./...
 
 ARG GO_VERSION

@@ -4,10 +4,13 @@ services:
   # Kafka Producers
   kafkaproducer:
     image: srm-producer
+    hostname: kafkaproducer
     build:
       context: ./
       dockerfile: ./Dockerfile
       target: producer
+    ports:
+      - 8080:8080 # http port
     deploy:
       mode: replicated
       replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
