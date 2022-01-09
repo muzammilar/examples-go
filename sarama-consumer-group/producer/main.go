@@ -4,13 +4,17 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"math/rand"
 	"os"
 	"os/signal"
+	"strconv"
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/Shopify/sarama"
 	"github.com/sirupsen/logrus"
@@ -27,6 +31,14 @@ const (
 )
 
 const (
+	// User ID range
+	UserIDMax = 5000 // The max possible value of user ID (not inclusive)
+	UserIDMin = 50   // The min possible value of user ID (inclusive)
+)
+
+var UserIDRange = UserIDMax - UserIDMin
+
+const (
 	// Hashing
 	PartitionHash       = "hash"       // compute the hash of the message and send the partition
 	PartitionRand       = "rand"       // select a random partition
@@ -38,6 +50,7 @@ const (
 	DefaultPublishTopic = "trees"       // The default topic to publish
 	DefaultPartitioner  = PartitionHash // The default partitioner for kafka
 	DefaultKafkaVersion = "2.8.1"       //The default kafka version
+	DefaultLoggingLevel = "debug"       // The default logging level of the application
 )
 
 // Supported partitioners
@@ -103,22 +116,32 @@ var Trees = []string{
 // message.go
 /////////////////////////////////
 
-// Note: JSON serialization is approximately 5-10x slower than binary formats (like protobufs) in my tests
-
 type Message struct {
 	Async  int    // Whether the data is sent as sync or async
 	UserId int    // This ID is NOT unique between messages and can be repeated
 	Data   string // Random tree name
 }
 
-func prepareMessage(topic, message string) *sarama.ProducerMessage {
-	msg := &sarama.ProducerMessage{
-		Topic:     topic,
-		Partition: -1,
-		Value:     sarama.StringEncoder(message),
+func prepareMessage(topic string, userId int, async int, logger *logrus.Logger) *sarama.ProducerMessage {
+	msg := Message{
+		Async:  async,
+		UserId: userId,
+		Data:   Trees[userId%len(Trees)], // len should be O(1) https://pkg.go.dev/reflect?utm_source=godoc#SliceHeader
 	}
 
-	return msg
+	// Note: JSON serialization is approximately 5-10x slower than binary formats (like protobufs) in my tests
+	jmsg, err := json.Marshal(msg)
+	if err != nil {
+		logger.Warnf("Failed to serialize '%#v' to JSON. Error: %s", msg, err.Error())
+	}
+
+	pmsg := &sarama.ProducerMessage{
+		Topic: topic,
+		Key:   sarama.StringEncoder(strconv.Itoa(userId)), // Partitioning Key
+		Value: sarama.ByteEncoder(jmsg),
+	}
+
+	return pmsg
 }
 
 /////////////////////////////////
@@ -144,7 +167,11 @@ func InitLoggerWithStdOut() *logrus.Logger {
 	logger.SetOutput(os.Stdout)
 
 	// set logging level
-	logger.SetLevel(logrus.InfoLevel)
+	level, err := logrus.ParseLevel(loglevel)
+	if err != nil {
+		panic(err)
+	}
+	logger.SetLevel(level)
 
 	// return the logger
 	return logger
@@ -153,6 +180,87 @@ func InitLoggerWithStdOut() *logrus.Logger {
 /////////////////////////////////
 // producer.go
 /////////////////////////////////
+
+func startSyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, syncproducer sarama.SyncProducer, logger *logrus.Logger) {
+	// wait group cleanup
+	defer wg.Done()
+
+	// create a new random generator source
+	randSouce := rand.NewSource(time.Now().UnixNano()) // NewSource is not thread safe
+	randGen := rand.New(randSouce)
+
+producerLoop:
+	for {
+		// get a random user id
+		userId := UserIDMin + randGen.Intn(UserIDRange)
+
+		// check context
+		select {
+		case <-ctx.Done():
+			if err := syncproducer.Close(); err != nil {
+				logger.Errorf("Worker #%d - syncproducer - failed to close with error: '%#v'", id, err)
+			}
+			break producerLoop
+		default:
+			// A `default` case is needed to make this select non-blocking
+		}
+		// send message
+		msg := prepareMessage(topic, userId, 0, logger)
+		partition, offset, err := syncproducer.SendMessage(msg)
+		if err != nil {
+			logger.Errorf("Worker #%d -  syncproducer - failed to send message with error: %s", id, err.Error())
+		} else {
+			logger.Debugf("Worker #%d -  syncproducer - saved a message to partion %d with offset %d", partition, offset)
+		}
+	}
+	logger.Infof("Worker #%d - syncproducer - shut down")
+}
+
+func startAsyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, asyncproducer sarama.SyncProducer, logger *logrus.Logger) {
+	// wait group notification
+	defer wg.Done()
+
+	// create a new random generator source
+	randSouce := rand.NewSource(time.Now().UnixNano()) // NewSource is not thread safe
+	randGen := rand.New(randSouce)
+
+	wg.Add(2) // one for the error channel and one for the succes channel
+	// read from the error channel
+	go func() {
+		defer wg.Done()
+		for err := range asyncproducer.Errors() {
+			logger.Errorf("Worker #%d - asyncproducer - error: %s", err.Error())
+		}
+		logger.Info("Worker #%d - asyncproducer - error channel closed")
+	}()
+
+	// read from the success channel (since we enabled this in configs)
+	go func() {
+		defer wg.Done()
+		for msg := range asyncproducer.Successes() {
+			logger.Infof("Worker #%d -  asyncproducer - saved a message to partion %d with offset %d", id, msg.Partition, msg.Offset)
+		}
+		logger.Info("Worker #%d - asyncproducer - success channel closed")
+	}()
+
+producerLoop:
+	for {
+		// get a random user id
+		userId := UserIDMin + randGen.Intn(UserIDRange)
+		// make a message
+		msg := prepareMessage(topic, userId, 0, logger)
+
+		// check context
+		select { // Do not write a default close otherwise it will become non-blocking
+		case <-ctx.Done():
+			asyncproducer.AsyncClose() // you can also use async close.
+			break producerLoop         // see this to see how to close channels in select https://stackoverflow.com/questions/13666253/breaking-out-of-a-select-statement-when-all-channels-are-closed
+		case asyncproducer.Input() <- msg:
+			logger.Debugf("Worker #%d -  asyncproducer - created a message", id)
+		}
+	}
+	logger.Infof("Worker #%d - asyncproducer - async shutdown initiated")
+}
 
 func startProducer(wg *sync.WaitGroup, ctx context.Context, id int, brokers []string, logger *logrus.Logger) {
 
@@ -165,12 +273,12 @@ func startProducer(wg *sync.WaitGroup, ctx context.Context, id int, brokers []st
 	// create the producers
 	asyncproducer, err = newAsyncProducer(brokers, logger)
 	if err != nil {
-		logger.Errorf("Worker #%d failed to create an async producer for broker '%+v': %#v", id, brokers, err)
+		logger.Errorf("Worker #%d - failed to create an async producer for broker '%+v': %#v", id, brokers, err)
 		return
 	}
 	syncproducer, err = newSyncProducer(brokers, logger)
 	if err != nil {
-		logger.Errorf("Worker #%d failed to create a sync producer for broker '%+v': %#v", id, brokers, err)
+		logger.Errorf("Worker #%d - failed to create a sync producer for broker '%+v': %#v", id, brokers, err)
 		return
 	}
 
@@ -178,73 +286,14 @@ func startProducer(wg *sync.WaitGroup, ctx context.Context, id int, brokers []st
 	var producerWg *sync.WaitGroup = new(sync.WaitGroup)
 	producerWg.Add(2) // one for the sync producer and another for the async producer
 	// sync producer
-	go func() {
-		defer producerWg.Done()
-	producerLoop:
-		for {
-			// check context
-			select {
-			case <-ctx.Done():
-				if err := syncproducer.Close(); err != nil {
-					logger.Errorf("Worker #%d failed to close syncproducer '%#v'", id, syncproducer)
-				}
-				break producerLoop
-			default:
-				// A `default` case is needed to make this select non-blocking
-			}
-			// send message
-			// TODO: FIX
-			msg := prepareMessage(topic, fmt.Sprintf("Sending Some secret # %d", i))
-			partition, offset, err := syncproducer.SendMessage(msg)
-			if err != nil {
-				fmt.Printf("%s error occured.", err.Error())
-			} else {
-				fmt.Printf("Message was saved to partion: %d.\nMessage offset is: %d.\n", partition, offset)
-			}
-		}
-	}()
-
+	go startSyncProducer(producerWg, ctx, id, syncproducer, logger)
 	// async producer
-	go func() {
-		defer producerWg.Done()
-
-		producerWg.Add(2) // one for the error channel and one for the succes channel
-		// read from the error channel
-		go func() {
-			defer producerWg.Done()
-			for err := range asyncproducer.Errors() {
-				logger.Errorf("ERRO!!!!")
-			}
-		}()
-
-		// read from the success channel
-		go func() {
-			defer producerWg.Done()
-			for s := range asyncproducer.Successes() {
-				logger.Infof("Success!")
-			}
-		}()
-
-	producerLoop:
-		for {
-			// TODO: FIX
-			msg := prepareMessage(topic, fmt.Sprintf("Sending Some secret # %d", i))
-			// send message
-
-			// check context
-			select { // Do not write a default close otherwise it will become non-blocking
-			case <-ctx.Done():
-				asyncproducer.AsyncClose() // you can also use async close.
-				break producerLoop         // see this to see how to close channels in select https://stackoverflow.com/questions/13666253/breaking-out-of-a-select-statement-when-all-channels-are-closed
-			case asyncproducer.Input() <- msg:
-				logger.Println("New Message produced")
-			}
-		}
-	}()
+	go startAsyncProducer(producerWg, ctx, id, asyncproducer, logger)
 
 	// close the producer when the context is done
 	<-ctx.Done()
 	// wait for producers to cleanly shut down
+	logger.Infof("Worker #%d - waiting for producers to shutdown")
 	producerWg.Wait()
 }
 
@@ -299,6 +348,7 @@ var (
 	partitioner = ""
 	verbose     = false
 	workers     = 1
+	loglevel    = ""
 )
 
 func init() {
@@ -309,7 +359,8 @@ func init() {
 	flag.StringVar(&versionStr, "version", DefaultKafkaVersion, "Kafka cluster version")
 	flag.StringVar(&topic, "topic", DefaultPublishTopic, "Kafka topic to send data to")
 	flag.StringVar(&partitioner, "partitioner", DefaultPartitioner, fmt.Sprintf("Producer partition selection strategy. Currently only supports %+v", SupportedPartitioners))
-	flag.BoolVar(&verbose, "verbose", false, "Enable Sarama logging to console")
+	flag.BoolVar(&verbose, "log.sarama", false, "Enable Sarama logging to console (as Printf)")
+	flag.StringVar(&loglevel, "log.level", DefaultLoggingLevel, "The logging level for the program (except sarama logs).")
 	flag.Parse()
 
 }

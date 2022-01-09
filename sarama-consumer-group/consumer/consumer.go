@@ -12,3 +12,6 @@ func main() {
 		time.Sleep(5 * time.Second)
 	}
 }
+
+// The consumer reads json as the following
+var data map[string]interface{}
