@@ -62,20 +62,42 @@ func InitLoggerWithStdOut() *logrus.Logger {
 
 // Sarama configuration options
 var (
-	brokers     = ""
-	version     = ""
-	group       = ""
-	topics      = ""
+	brokersStr  = ""
+	versionStr  = ""
+	topicsStr   = ""
 	partitioner = ""
 	verbose     = false
+	async       = false
+	workers     = 1
 )
 
-func newSyncProducer() (sarama.SyncProducer, error) {
+func producerConfig(logger *logrus.Logger) sarama.Config {
 	config := sarama.NewConfig()
-	config.Producer.Partitioner = sarama.NewRandomPartitioner
+	// add logging support in verbose mode
+	if verbose {
+		sarama.Logger = logger
+	}
+	// select partitioner
+	switch partitioner {
+	case PartitionHash:
+		config.Producer.Partitioner = sarama.NewHashPartitioner
+	case PartitionRand:
+		config.Producer.Partitioner = sarama.NewRandomPartitioner
+	case PartitionRoundRobin:
+		config.Producer.Partitioner = sarama.NewRoundRobinPartitioner
+	default: // panic should generally be avoided in production, however it's a config check early in the program so it should be okay
+		panic(fmt.Sprintf("Unknown Kafka partitoner: %s", partitioner))
+	}
+	// Kafka Acks
 	config.Producer.RequiredAcks = sarama.WaitForLocal // wait for local commit to succeed
-	config.Producer.Return.Errors = true
-	config.Producer.Return.Successes = false // Used by async producer only
+	config.Producer.Return.Errors = true               // return the errors via a channel to the user
+	config.Producer.Return.Successes = false           // Used by async producer only
+
+	return config
+}
+
+func newSyncProducer(brokers string, logger *logrus.Logger) (sarama.SyncProducer, error) {
+	config := producerConfig(logger)
 	producer, err := sarama.NewSyncProducer(brokers, config)
 
 	return producer, err
@@ -94,11 +116,13 @@ func prepareMessage(topic, message string) *sarama.ProducerMessage {
 func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-producer/main.go
 
 	// program flags
-	flag.StringVar(&brokers, "brokers", "kafka:9094", "Kafka bootstrap brokers to connect to, as a comma separated list")
-	flag.StringVar(&version, "version", DefaultKafkaVersion, "Kafka cluster version")
-	flag.StringVar(&topics, "topics", DefaultPublishTopic, "Kafka topics to be consumed, as a comma separated list")
+	flag.StringVar(&brokersStr, "brokers", "kafka:9094", "Kafka bootstrap brokers to connect to, as a comma separated list")
+	flag.IntVar(&workers, "workers", 1, "Number of producers for the program")
+	flag.StringVar(&versionStr, "version", DefaultKafkaVersion, "Kafka cluster version")
+	flag.StringVar(&topicsStr, "topics", DefaultPublishTopic, "Kafka topics to be consumed, as a comma separated list")
 	flag.StringVar(&partitioner, "partitioner", DefaultPartitioner, fmt.Sprintf("Producer partition selection strategy. Currently only supports %+v", supportedPartitioners))
-	flag.BoolVar(&verbose, "verbose", false, "Sarama logging")
+	flag.BoolVar(&async, "async", false, "Use an async producer (instead of the default sync producer)")
+	flag.BoolVar(&verbose, "verbose", false, "Enable Sarama logging to console")
 	flag.Parse()
 
 	producer, err := newProducer()
