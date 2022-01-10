@@ -25,11 +25,11 @@ const (
 
 const (
 	// Defaults
-	DefaultPublishTopic          = "trees"       // The default topic to publish
-	DefaultPartitioner           = PartitionHash // The default partitioner for kafka
+	DefaultPublishTopic          = "test"        // The default topic to publish
+	DefaultPartitioner           = PartitionRand // The default partitioner for kafka
 	DefaultKafkaVersion          = "2.8.1"       //The default kafka version
 	DefaultLoggingLevel          = "info"        // The default logging level of the application
-	DefaultConnectionBackoffMs   = 5000          // The defualt time in milliseconds before retrying to connect to kafka when creating producers
+	DefaultConnectionBackoffMs   = 10000         // The defualt time in milliseconds before retrying to connect to kafka when creating producers
 	DefaultMessageSendIntervalMs = 100           // The default interval between sending messages
 )
 

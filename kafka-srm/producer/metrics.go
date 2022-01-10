@@ -24,7 +24,7 @@ func startMetricsCollector() {
 	// start metrics handler
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
-		http.ListenAndServe(":8080", nil)
+		http.ListenAndServe(":8080", nil) // hard code metrics port for now
 	}()
 	// start periodic updater
 	go prometheusClient.UpdatePrometheusMetrics()

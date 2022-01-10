@@ -11,6 +11,8 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+
+	"github.com/sirupsen/logrus"
 )
 
 // Sarama configuration options
@@ -48,8 +50,12 @@ func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-produce
 
 	// validate brokers and topics and other input configs (if needed). Skipping since it's a proof-of-concept
 
-	// start the metrics handler
+	// start the metrics handler (starts go routines)
 	startMetricsCollector()
+
+	// make sure that the client exists (blocking call)
+	conf := producerConfig(logger)
+	validateTopicInformation(conf)
 
 	// create a context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -79,4 +85,14 @@ func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-produce
 	logger.Info("Waiting for workers to shutdown")
 	wg.Wait()
 	logger.Info("Shutdown successful")
+}
+
+func validateTopicInformation(brokers []string, config *sarama.Config, logger *logrus.Logger) {
+	// create a client
+	client := sarama.NewClient(brokers, config)
+	defer client.Close()
+
+	// wait until the topic is created
+
+	// wait untill all the partitions are writeable partitions
 }

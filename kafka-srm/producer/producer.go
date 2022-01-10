@@ -121,7 +121,7 @@ func startAsyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, asyncpr
 	go func() {
 		defer wg.Done()
 		for err := range asyncproducer.Errors() {
-			logger.Errorf("Worker #%d - asyncproducer - error: %s", err.Error())
+			logger.Errorf("Worker #%d - asyncproducer - error: %s", id, err.Error())
 		}
 		logger.Infof("Worker #%d - asyncproducer - error channel closed", id)
 	}()
@@ -153,7 +153,7 @@ producerLoop:
 			logger.Debugf("Worker #%d -  asyncproducer - created a message", id)
 		}
 	}
-	logger.Infof("Worker #%d - asyncproducer - async shutdown initiated")
+	logger.Infof("Worker #%d - asyncproducer - async shutdown initiated", id)
 }
 
 func newAsyncProducer(brokers []string, id int, logger *logrus.Logger) sarama.AsyncProducer {
@@ -194,8 +194,9 @@ func producerConfig(logger *logrus.Logger) *sarama.Config {
 	}
 	// Kafka Acks
 	config.Producer.RequiredAcks = sarama.WaitForLocal // wait for local commit to succeed
-	config.Producer.Return.Errors = true               // return the errors via a channel to the user
-	config.Producer.Return.Successes = true            // It must always be true for sync producer, for async producer, it needs a channel read
+	//config.Producer.RequiredAcks = sarama.WaitForAll // wait for local commit to succeed
+	config.Producer.Return.Errors = true    // return the errors via a channel to the user
+	config.Producer.Return.Successes = true // It must always be true for sync producer, for async producer, it needs a channel read
 
 	config.MetricRegistry = MetricsRegistry // alternatively we can use metrics.DefaultRegistry
 
@@ -228,6 +229,6 @@ func startProducer(wg *sync.WaitGroup, ctx context.Context, id int, brokers []st
 	// close the producer when the context is done
 	<-ctx.Done()
 	// wait for producers to cleanly shut down
-	logger.Infof("Worker #%d - waiting for producers to shutdown")
+	logger.Infof("Worker #%d - waiting for producers to shutdown", id)
 	producerWg.Wait()
 }

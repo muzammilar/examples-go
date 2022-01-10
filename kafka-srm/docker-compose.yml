@@ -9,8 +9,8 @@ services:
       context: ./
       dockerfile: ./Dockerfile
       target: producer
-    ports:
-      - 8080:8080 # http port
+    depends_on:
+      - kafka
     deploy:
       mode: replicated
       replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
@@ -21,6 +21,8 @@ services:
       context: ./
       dockerfile: ./Dockerfile
       target: consumer
+    depends_on:
+      - kafka
     deploy:
       mode: replicated
       replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
