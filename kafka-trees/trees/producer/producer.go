@@ -11,6 +11,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/muzammilar/examples-go/kafka-trees/trees/common"
+
 	"github.com/Shopify/sarama"
 	"github.com/sirupsen/logrus"
 )
@@ -29,7 +31,7 @@ func prepareMessage(topic string, userId int, async int, logger *logrus.Logger) 
 	msg := Message{
 		Async:  async,
 		UserId: userId,
-		Data:   Trees[userId%len(Trees)], // len should be O(1) https://pkg.go.dev/reflect?utm_source=godoc#SliceHeader
+		Data:   common.Trees[userId%len(common.Trees)], // len should be O(1) https://pkg.go.dev/reflect?utm_source=godoc#SliceHeader
 	}
 
 	// Note: JSON serialization is approximately 5-10x slower than binary formats (like protobufs) in my tests
@@ -62,10 +64,10 @@ func startSyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, syncprod
 producerLoop:
 	for {
 		// sleep for a while
-		time.Sleep(DefaultMessageSendIntervalMs * time.Millisecond)
+		time.Sleep(common.DefaultMessageSendIntervalMs * time.Millisecond)
 
 		// get a random user id
-		userId := UserIDMin + randGen.Intn(UserIDRange)
+		userId := common.UserIDMin + randGen.Intn(common.UserIDRange)
 
 		// check context
 		select {
@@ -78,15 +80,15 @@ producerLoop:
 			// A `default` case is needed to make this select non-blocking
 		}
 		// send message
-		msg := prepareMessage(topic, userId, 0, logger)
+		msg := prepareMessage(topic, userId, common.ProducerSync, logger)
 		partition, offset, err := syncproducer.SendMessage(msg)
 		if err != nil {
 			logger.Errorf("Worker #%d -  syncproducer - failed to send message with error: %s", id, err.Error())
 		} else {
-			logger.Debugf("Worker #%d -  syncproducer - saved a message to partion %d with offset %d", partition, offset)
+			logger.Debugf("Worker #%d -  syncproducer - saved a message to partion %d with offset %d", id, partition, offset)
 		}
 	}
-	logger.Infof("Worker #%d - syncproducer - shut down")
+	logger.Infof("Worker #%d - syncproducer - shut down", id)
 }
 
 func newSyncProducer(brokers []string, id int, logger *logrus.Logger) sarama.SyncProducer {
@@ -98,7 +100,7 @@ func newSyncProducer(brokers []string, id int, logger *logrus.Logger) sarama.Syn
 	// ignore context handling here (can cause deadlock)
 	for producer, err = sarama.NewSyncProducer(brokers, config); err != nil; producer, err = sarama.NewSyncProducer(brokers, config) {
 		logger.Errorf("Worker #%d - failed to create a sync producer for broker '%+v': %#v", id, brokers, err)
-		time.Sleep(DefaultConnectionBackoffMs * time.Millisecond)
+		time.Sleep(common.DefaultConnectionBackoffMs * time.Millisecond)
 	}
 
 	return producer
@@ -138,11 +140,11 @@ func startAsyncProducer(wg *sync.WaitGroup, ctx context.Context, id int, asyncpr
 producerLoop:
 	for {
 		// sleep for a while
-		time.Sleep(DefaultMessageSendIntervalMs * time.Millisecond)
+		time.Sleep(common.DefaultMessageSendIntervalMs * time.Millisecond)
 		// get a random user id
-		userId := UserIDMin + randGen.Intn(UserIDRange)
+		userId := common.UserIDMin + randGen.Intn(common.UserIDRange)
 		// make a message
-		msg := prepareMessage(topic, userId, 0, logger)
+		msg := prepareMessage(topic, userId, common.ProducerAsync, logger)
 
 		// check context
 		select { // Do not write a default close otherwise it will become non-blocking
@@ -165,7 +167,7 @@ func newAsyncProducer(brokers []string, id int, logger *logrus.Logger) sarama.As
 	// ignore context handling here (can cause deadlock)
 	for producer, err = sarama.NewAsyncProducer(brokers, config); err != nil; producer, err = sarama.NewAsyncProducer(brokers, config) {
 		logger.Errorf("Worker #%d - failed to create an async producer for broker '%+v': %#v", id, brokers, err)
-		time.Sleep(DefaultConnectionBackoffMs * time.Millisecond)
+		time.Sleep(common.DefaultConnectionBackoffMs * time.Millisecond)
 	}
 
 	return producer
@@ -177,28 +179,36 @@ func newAsyncProducer(brokers []string, id int, logger *logrus.Logger) sarama.As
 
 func producerConfig(logger *logrus.Logger) *sarama.Config {
 	config := sarama.NewConfig()
+	// version options
+	version, err := sarama.ParseKafkaVersion(versionStr)
+	if err != nil {
+		panic(fmt.Sprintf("Error parsing Kafka version: %v", err))
+	}
+	config.Version = version
 	// add logging support in verbose mode
 	if verbose {
 		sarama.Logger = logger
 	}
 	// select partitioner
 	switch partitioner {
-	case PartitionHash:
+	case common.PartitionHash:
 		config.Producer.Partitioner = sarama.NewHashPartitioner
-	case PartitionRand:
+	case common.PartitionRand:
 		config.Producer.Partitioner = sarama.NewRandomPartitioner
-	case PartitionRoundRobin:
+	case common.PartitionRoundRobin:
 		config.Producer.Partitioner = sarama.NewRoundRobinPartitioner
 	default: // panic should generally be avoided in production, however it's a config check early in the program so it should be okay
 		panic(fmt.Sprintf("Unknown Kafka partitoner: %s", partitioner))
 	}
+	// MetaData Refresh Frequency. Generally, it shold be high since it doesn't change often. But for PoC we start producer before kafka often
+	config.Metadata.RefreshFrequency = 1 * time.Minute
 	// Kafka Acks
 	config.Producer.RequiredAcks = sarama.WaitForLocal // wait for local commit to succeed
 	//config.Producer.RequiredAcks = sarama.WaitForAll // wait for local commit to succeed
 	config.Producer.Return.Errors = true    // return the errors via a channel to the user
 	config.Producer.Return.Successes = true // It must always be true for sync producer, for async producer, it needs a channel read
 
-	config.MetricRegistry = MetricsRegistry // alternatively we can use metrics.DefaultRegistry
+	config.MetricRegistry = common.MetricsRegistry // alternatively we can use metrics.DefaultRegistry
 
 	return config
 }

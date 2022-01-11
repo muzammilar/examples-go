@@ -1,6 +1,6 @@
-// The module producer contains the code for a sample data producer
+// The common package contains the shared code between both producer and consumer
 
-package main
+package common
 
 import (
 	"net/http"
@@ -15,12 +15,18 @@ import (
 // metrics registry
 var MetricsRegistry metrics.Registry
 
-func startMetricsCollector() {
+//StartMetricsCollector starts the metric subsystem with an internal registry on port 8080 (and periodically updates)
+func StartMetricsCollector(subsystem string) {
 	// initialize a new metrics registry
 	MetricsRegistry = metrics.NewRegistry() // alternatively we can use metrics.DefaultRegistry
 	// setup the prometheus client for go-metrics
 	prometheusClient := prometheusmetrics.NewPrometheusProvider(
-		MetricsRegistry, "kafkasrm", "producer", prometheus.DefaultRegisterer, 1*time.Second)
+		MetricsRegistry,              // registry
+		"trees",                      // system
+		subsystem,                    //subsystem
+		prometheus.DefaultRegisterer, // prometheus registerer
+		1*time.Second,                // update frequency
+	)
 	// start metrics handler
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())

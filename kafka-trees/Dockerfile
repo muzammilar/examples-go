@@ -8,10 +8,11 @@ ARG GO_VERSION=1.17
 FROM golang:${GO_VERSION}-alpine AS producerbuilder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
-COPY ./producer .
+COPY ./trees .
 # add missing dependencies
 RUN go mod tidy
-RUN go install -v ./...
+# install the module
+RUN go install -v ./producer
 
 ARG GO_VERSION
 
@@ -19,10 +20,11 @@ ARG GO_VERSION
 FROM golang:${GO_VERSION}-alpine AS consumerbuilder
 RUN apk add --no-cache git
 WORKDIR /go/src/app
-COPY ./consumer .
-RUN go mod init
-RUN go get -d -v ./...
-RUN go install -v ./...
+COPY ./trees .
+# add missing dependencies
+RUN go mod tidy
+# install the module
+RUN go install -v ./consumer
 
 ###############################################
 # Runner stage
@@ -31,11 +33,11 @@ RUN go install -v ./...
 #producer
 FROM alpine:latest AS producer
 RUN apk --no-cache add ca-certificates
-COPY --from=producerbuilder /go/bin/producer /saramaproducer
-CMD ./saramaproducer
+COPY --from=producerbuilder /go/bin/producer /treeproducer
+CMD ./treeproducer
 
 #consumer
 FROM alpine:latest AS consumer
 RUN apk --no-cache add ca-certificates
-COPY --from=consumerbuilder /go/bin/app /saramaconsumer
-CMD ./saramaconsumer
+COPY --from=consumerbuilder /go/bin/consumer /treeconsumer
+CMD ./treeconsumer

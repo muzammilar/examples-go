@@ -1,6 +1,6 @@
-// The module producer contains the code for a sample data producer
+// The common package contains the shared code between both producer and consumer
 
-package main
+package common
 
 import (
 	"os"
@@ -9,7 +9,7 @@ import (
 )
 
 // InitLoggerWithFileOutput initializes a logger for a given configuration
-func InitLoggerWithStdOut() *logrus.Logger {
+func InitLoggerWithStdOut(loglevel string) *logrus.Logger {
 
 	// create a new logger
 	var logger *logrus.Logger = logrus.New()

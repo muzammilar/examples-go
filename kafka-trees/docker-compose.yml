@@ -2,21 +2,29 @@ version: '3.9'
 
 services:
   # Kafka Producers
-  kafkaproducer:
-    image: srm-producer
-    hostname: kafkaproducer
+  producertree:
+    image: tree-producer
+    hostname: producertree
     build:
       context: ./
       dockerfile: ./Dockerfile
       target: producer
     depends_on:
       - kafka
-    deploy:
-      mode: replicated
-      replicas: 1 # if replicas: 0 is used, then none of the other containers are started either
+  producertest:
+    image: tree-producer
+    hostname: producertest
+    command: ./treeproducer -topic test -workers 3
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+      target: producer
+    depends_on:
+      - kafka
   # Kafka Consumers
-  kafkaconsumer:
-    image: srm-consumer
+  consumer:
+    image: tree-consumer
+    command: ./treeconsumer -topics test,trees
     build:
       context: ./
       dockerfile: ./Dockerfile
@@ -32,13 +40,14 @@ services:
   # Kafka container
   kafka:
     image: wurstmeister/kafka:2.13-2.8.1
-    restart: on-failure # restart in case of crash
+    # restart: on-failure # restart in case of crash
+    hostname: kafka # hardcoding for internal use - not needed by clients
     environment:
       KAFKA_LISTENERS: INSIDE://:9092,OUTSIDE://:9094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
       # TOPICS: `trees` will have 13 partitions and 1 replica, `test` will have 7 partitions and 1 replica
-      KAFKA_CREATE_TOPICS: "trees:13:1,test:7:1"
+      KAFKA_CREATE_TOPICS: "trees:13:1,test:37:1"
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
   # Prometheus
   prometheus:

@@ -1,4 +1,4 @@
-module github.com/muzammilar/examples-go/kafka-srm/producer
+module github.com/muzammilar/examples-go/kafka-trees/trees // using `-` in module names is against convention
 
 go 1.17
 

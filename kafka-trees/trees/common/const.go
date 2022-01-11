@@ -1,11 +1,25 @@
-// The module producer contains the code for a sample data producer
+// The common package contains the shared code between both producer and consumer
 
-package main
+package common
 
 const (
 	// Producer Types (Async)
 	ProducerSync  = iota // 0
 	ProducerAsync        // 1
+)
+const (
+	// Defaults
+	DefaultKafkaBrokers        = "kafka:9094" // The default kafka brokers as a comma separate list
+	DefaultKafkaVersion        = "2.8.1"      //The default kafka version
+	DefaultTopic               = "trees"      // The default topic to publish or subscribe
+	DefaultLoggingLevel        = "info"       // The default logging level of the application
+	DefaultConnectionBackoffMs = 10000        // The defualt time in milliseconds before retrying to connect to kafka when creating producers
+	// Defaults - Producer only defaults
+	DefaultPartitioner           = PartitionHash // The default partitioner for producers
+	DefaultMessageSendIntervalMs = 100           // The default interval between sending messages for producers
+	// Defaults - Consumer only defaults
+	DefaultConsumerGroup = "treeconsumer" // The default consumer group for querying kafka by consumers
+	DefaultAssigner      = "range"        // The default consumer group assignment method for consumers
 )
 
 const (
@@ -21,16 +35,6 @@ const (
 	PartitionHash       = "hash"       // compute the hash of the message and send the partition
 	PartitionRand       = "rand"       // select a random partition
 	PartitionRoundRobin = "roundrobin" // select partition using round robin i.e. (i+1)%n
-)
-
-const (
-	// Defaults
-	DefaultPublishTopic          = "test"        // The default topic to publish
-	DefaultPartitioner           = PartitionRand // The default partitioner for kafka
-	DefaultKafkaVersion          = "2.8.1"       //The default kafka version
-	DefaultLoggingLevel          = "info"        // The default logging level of the application
-	DefaultConnectionBackoffMs   = 10000         // The defualt time in milliseconds before retrying to connect to kafka when creating producers
-	DefaultMessageSendIntervalMs = 100           // The default interval between sending messages
 )
 
 // Supported partitioners

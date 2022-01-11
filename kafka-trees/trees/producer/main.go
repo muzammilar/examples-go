@@ -1,4 +1,4 @@
-// The module producer contains the code for a sample data producer
+// The module trees/producer contains the code for a sample data producer
 
 package main
 
@@ -11,11 +11,12 @@ import (
 	"strings"
 	"sync"
 	"syscall"
+	"time"
 
-	"github.com/sirupsen/logrus"
+	"github.com/muzammilar/examples-go/kafka-trees/trees/common"
 )
 
-// Sarama configuration options
+// Producer configuration options
 var (
 	brokersStr  = ""
 	versionStr  = ""
@@ -29,33 +30,38 @@ var (
 func init() {
 
 	// program flags
-	flag.StringVar(&brokersStr, "brokers", "kafka:9094", "Kafka bootstrap brokers to connect to, as a comma separated list")
-	flag.IntVar(&workers, "workers", 1, "Number of producers for the program")
-	flag.StringVar(&versionStr, "version", DefaultKafkaVersion, "Kafka cluster version")
-	flag.StringVar(&topic, "topic", DefaultPublishTopic, "Kafka topic to send data to")
-	flag.StringVar(&partitioner, "partitioner", DefaultPartitioner, fmt.Sprintf("Producer partition selection strategy. Currently only supports %+v", SupportedPartitioners))
+	flag.StringVar(&brokersStr, "brokers", common.DefaultKafkaBrokers, "Kafka bootstrap brokers to connect to, as a comma separated list")
+	flag.IntVar(&workers, "workers", 2, "Number of producers for the program")
+	flag.StringVar(&versionStr, "version", common.DefaultKafkaVersion, "Kafka cluster version")
+	flag.StringVar(&topic, "topic", common.DefaultTopic, "Kafka topic to send data to")
+	flag.StringVar(&partitioner, "partitioner", common.DefaultPartitioner, fmt.Sprintf("Producer partition selection strategy. Currently only supports %+v", common.SupportedPartitioners))
 	flag.BoolVar(&verbose, "log.sarama", false, "Enable Sarama logging to console (as Printf)")
-	flag.StringVar(&loglevel, "log.level", DefaultLoggingLevel, "The logging level for the program (except sarama logs).")
+	flag.StringVar(&loglevel, "log.level", common.DefaultLoggingLevel, "The logging level for the program (except sarama logs).")
 	flag.Parse()
 
 }
 
-func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-producer/main.go
+func main() {
 
 	// setup logger
-	logger := InitLoggerWithStdOut()
+	logger := common.InitLoggerWithStdOut(loglevel)
 
 	// convert strings to lists
 	brokers := strings.Split(brokersStr, ",")
 
-	// validate brokers and topics and other input configs (if needed). Skipping since it's a proof-of-concept
-
 	// start the metrics handler (starts go routines)
-	startMetricsCollector()
+	common.StartMetricsCollector("producer")
 
-	// make sure that the client exists (blocking call)
+	// validate brokers and topics and other input configs.
+	// make sure that the kafka topic exists (blocking call with a loop) in case the client spins up before kafka is up
 	conf := producerConfig(logger)
-	validateTopicInformation(conf)
+	if err := conf.Validate(); err != nil {
+		logger.Fatal(err)
+	}
+	for !common.ValidateTopicInformation(brokers, topic, conf, logger) {
+		// retry interval
+		time.Sleep(common.DefaultConnectionBackoffMs * time.Millisecond)
+	}
 
 	// create a context
 	ctx, cancel := context.WithCancel(context.Background())
@@ -85,14 +91,4 @@ func main() { //https://github.com/tcnksm-sample/sarama/blob/master/sync-produce
 	logger.Info("Waiting for workers to shutdown")
 	wg.Wait()
 	logger.Info("Shutdown successful")
-}
-
-func validateTopicInformation(brokers []string, config *sarama.Config, logger *logrus.Logger) {
-	// create a client
-	client := sarama.NewClient(brokers, config)
-	defer client.Close()
-
-	// wait until the topic is created
-
-	// wait untill all the partitions are writeable partitions
 }
