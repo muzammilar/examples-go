@@ -137,7 +137,7 @@ func startConsumer(wg *sync.WaitGroup, ctx context.Context, brokers []string, to
 	var consuming bool = true
 	for consuming {
 		// start the consuming session
-		if err := consumer.Consume(ctx, topics, handler); err != nil {
+		if err = consumer.Consume(ctx, topics, handler); err != nil {
 			log.Fatalf("Consumer - Consume Error: %v", err)
 		}
 		// check if context was cancelled, signaling that the consumer should stop
@@ -145,6 +145,8 @@ func startConsumer(wg *sync.WaitGroup, ctx context.Context, brokers []string, to
 		case <-ctx.Done():
 			consuming = false
 		default: // a default case to make this non blocking select
+			// sleep for a while before retrying (since the kafka cluster might have gone down)
+			// e.g err == sarama.ErrOutOfBrokers (err above)
 		}
 	}
 	// ignore wait for error channel to close - not really needed
