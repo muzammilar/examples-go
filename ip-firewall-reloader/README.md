@@ -3,6 +3,13 @@ This example also provides the performance benchmarks for different mechanisms t
 
 The *primary* reason for this example is to benchmark the performance difference of the approaches considered from the reader's perspective (and not the writer/reloader/updater perspective).
 
+### Run Tests
+In order to run the test, run the following:
+```sh
+docker-compose up --build
+
+```
+
 ## Approaches considered
 
 For our benchmarks we consider multiple approaches as follows:
@@ -19,4 +26,4 @@ For our benchmarks we consider multiple approaches as follows:
 
 **Contexts:** Using a context to update the readers about the certifcate variable being changed.
 
-# Results
+### Results
