@@ -1,6 +1,9 @@
 package ipfirewall
 
-import "net"
+import (
+	"net"
+	"sync/atomic"
+)
 
 /****************/
 /*     Mode     */
@@ -46,4 +49,21 @@ func NewIPFirewall(m FWMode) *IPFirewall {
 // IsActive checks if the firewall is either in allow mode or deny mode
 func (i *IPFirewall) IsActive() bool {
 	return i.mode != ModeDisabled
+}
+
+// IncVersion is a thread-safe way to increment the version number of the Firewall mode.
+// Note that the version must be incremented after mode updates or updates to the ipList (but not before the updates)
+func (i *IPFirewall) IncVersion() {
+	atomic.AddUint64(&i.versionNumber, 1)
+}
+
+// ReadVersion reads the version number using atomic instructions.
+func (i *IPFirewall) ReadVersion() uint64 {
+	return atomic.LoadUint64(&i.versionNumber)
+}
+
+// ReadEventuallyConsistentVersion reads the version number without using atomic instructions.
+// This is not recommended especially for multi-cpu architecture, however, it could be an allowable solution for some applications.
+func (i *IPFirewall) ReadEventuallyConsistentVersion() uint64 {
+	return i.versionNumber
 }

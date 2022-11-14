@@ -1,12 +1,12 @@
 ## Variables
 PWD := $(shell pwd)
-# number of cpus for benchmark testing
-BENCH_CPUS := 1
+# number of cpus for benchmark testing (a list can be provided)
+BENCH_CPUS := 1,2,4,8
 # number of iterations for benchmark testing - no whitespace after variable
 # If comment is added after number below, that would add a space
 #BENCH_ITERATIONS :=1000 # extra space added
 #BENCH_ITERATIONS :=1000# no extra space added
-BENCH_ITERATIONS :=1000
+BENCH_ITERATIONS :=100000
 # Parent Directory
 PARENT_PATH:=$(abspath ..)
 
