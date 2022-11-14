@@ -8,19 +8,19 @@ import "net"
 type FWMode int
 
 const (
-	Unknown FWMode = iota
-	AllowList
-	BlockList
+	ModeDisabled FWMode = iota
+	ModeAllow           // for Allowlists
+	ModeBlock           // or ModeDeny for Blocklists
 )
 
 const (
-	unknownStr = "unknown"
-	allowStr   = "allow"
-	blockStr   = "block"
+	disabledStr = "disabled"
+	allowStr    = "allow"
+	blockStr    = "block/deny"
 )
 
 func (f FWMode) String() string {
-	return [...]string{unknownStr, allowStr, blockStr}[f]
+	return [...]string{disabledStr, allowStr, blockStr}[f]
 }
 
 /****************/
@@ -34,4 +34,16 @@ type IPFirewall struct {
 	ipList        []*net.IPNet
 	mode          FWMode
 	versionNumber uint64
+}
+
+// NewIPFirewall creates a new IP Firewall with a given mode
+func NewIPFirewall(m FWMode) *IPFirewall {
+	return &IPFirewall{
+		mode: m,
+	}
+}
+
+// IsActive checks if the firewall is either in allow mode or deny mode
+func (i *IPFirewall) IsActive() bool {
+	return i.mode != ModeDisabled
 }
