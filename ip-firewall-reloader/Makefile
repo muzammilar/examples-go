@@ -11,15 +11,9 @@ BENCH_ITERATIONS :=1000
 PARENT_PATH:=$(abspath ..)
 
 ## Builds
-IPUPDATER:=ipupdater
+.PHONY: all clean test lint goget
 
-.PHONY: all clean test lint gomodule clean_gomodule gomodinit gomodtidy goget
-
-all: clean gomodtidy test ${IPUPDATER}
-
-${IPUPDATER}:
-	go build -ldflags "-X main.version=${SERVER_VERSION}" -o ${PARENT_PATH}/${BUILD_DIR}/${FSSERVER} ./cmd/ipupdater.go
-
+all: clean test
 
 clean:
 	echo "Nothing to clean in ${PWD}"
@@ -33,19 +27,6 @@ test:
 lint:
 	golint ./...
 
-# clean the go module
-clean_gomodule:
-	-rm -f go.mod go.sum
-
-# initialize module
-gomodinit:
-	go mod init ${GOMODULENAME}
-
-# add module requirements and sums
-gomodtidy:
-	go mod tidy
-
-gomodule: clean_gomodule gomodinit gomodtidy
-
+# add module requirements
 goget:
 	go get -d -v ./...
