@@ -43,6 +43,17 @@ func BenchmarkReadVersion(b *testing.B) {
 	}
 }
 
+func BenchmarkParallelReadVersion(b *testing.B) {
+
+	b.RunParallel(func(pb *testing.PB) {
+		ip := new(IPFirewall)
+		ip.versionNumber = uint64(time.Now().Unix())
+		for pb.Next() {
+			ip.ReadVersion()
+		}
+	})
+}
+
 func BenchmarkReadEventuallyConsistentVersion(b *testing.B) {
 
 	ip := new(IPFirewall)
@@ -51,4 +62,15 @@ func BenchmarkReadEventuallyConsistentVersion(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		ip.ReadEventuallyConsistentVersion()
 	}
+}
+
+func BenchmarkParallelReadEventuallyConsistentVersion(b *testing.B) {
+
+	b.RunParallel(func(pb *testing.PB) {
+		ip := new(IPFirewall)
+		ip.versionNumber = uint64(time.Now().Unix())
+		for pb.Next() {
+			ip.ReadEventuallyConsistentVersion()
+		}
+	})
 }

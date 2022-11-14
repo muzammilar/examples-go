@@ -1,7 +1,7 @@
 ## Variables
 PWD := $(shell pwd)
-# number of cpus for benchmark testing (a list can be provided)
-BENCH_CPUS := 1,2,4,8,16,32
+# number of processes for benchmark testing (a list can be provided)
+BENCH_CPUS := 1,2,4,8,16,32,64,128,256,512,1024
 # number of iterations for benchmark testing - no whitespace after variable
 # If comment is added after number below, that would add a space
 #BENCH_ITERATIONS :=1000 # extra space added
