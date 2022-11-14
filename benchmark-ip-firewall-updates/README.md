@@ -24,6 +24,7 @@ For our benchmarks we consider multiple approaches as follows:
 
 **Channels:** Using a channel of the pointer. This approach requires the write to know exactly the number of readers and is prone to race conditions with multiple readers (so it's only feasible for a single reader).
 
-**Contexts:** Using a context to update the readers about the `IPFirewall` variable being changed.
+**Contexts:** Using a context to update the readers about the `IPFirewall` variable being changed. Contexts and channels are somewhat similar since contexts generally use a channel (as of Go 1.18) for their their `Done` function.
 
-### Results
+### Results:
+This [link](https://stackoverflow.com/questions/57562606/why-does-sync-mutex-largely-drop-performance-when-goroutine-contention-is-more-t) has some good graphs about performances.
