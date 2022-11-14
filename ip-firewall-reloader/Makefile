@@ -6,7 +6,7 @@ BENCH_CPUS := 1,2,4,8,16,32
 # If comment is added after number below, that would add a space
 #BENCH_ITERATIONS :=1000 # extra space added
 #BENCH_ITERATIONS :=1000# no extra space added
-BENCH_ITERATIONS :=100000
+BENCH_ITERATIONS :=1000000
 # Parent Directory
 PARENT_PATH:=$(abspath ..)
 
