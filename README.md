@@ -4,6 +4,9 @@ Example codes in golang for fun. All examples should have associated `Dockerfile
 The `ext` directory project that are imported as git submodules.
 
 ## Summary of the Projects
+
+`benchmark-ip-firewall-updates`: An example on peformance benchmarks for increment integers atomically.
+
 `chocolate-errors`: An example of passing custom errors in golang (using chocolates as references).
 
 `clickhouse-multitable-bulk-ingest`: Bulk ingest example to clickhouse using `clickhouse-go`.
@@ -11,6 +14,8 @@ The `ext` directory project that are imported as git submodules.
 `clickhouse-struct-ingest-performance`:  Performance evaluation of `clickhouse-go`.
 
 `ext/geomrpc`: An example of gRPC clients and servers, including both server-side and client-side streaming and gRPC metrics collection using Prometheus (including both connection stats and RPC stats).
+
+`file-shreder`: An example to implement a `shred` function like the [shred](https://manpages.ubuntu.com/manpages/jammy/man1/shred.1.html) command line utility with some tests.
 
 `guage-approximator`: A basic example of implement an average gauge metric over a given time interval. The example uses a circular ring buffer to store the last n-values. The example is simliar to Prometheus' *summary* metric.
 
