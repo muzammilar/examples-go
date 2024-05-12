@@ -59,7 +59,7 @@ func main() {
 	// flags
 	envPrefixPtr := flag.String("env-prefix", "MYAPP_", "The prefix of the environmental variables to override the local configuration optoins.") // skip validation
 	baseConfPathPtr := flag.String("conf-base", "/config/config.yaml", "The path of the base configuration file.")                                // skip path validation
-	overrideConfPathPtr := flag.String("conf-override", "/config/config.json", "The path of the override configuration file.")                    // skip path validation
+	overrideConfPathPtr := flag.String("conf-override", "/config/override.json", "The path of the override configuration file.")                  // skip path validation
 
 	//parse flags
 	flag.Parse()

@@ -6,8 +6,6 @@ In this example, base config is loaded (yaml), then the override file is applied
 ```sh
 docker compose up --build
 
-# BUILD_TAG
-# docker compose up --build --env TAG=0.0.2
 ```
 
 #### Docker Environment Variables and Docker Compose
