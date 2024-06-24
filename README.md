@@ -23,6 +23,8 @@ The `ext` directory project that are imported as git submodules.
 
 `kafka-trees`: A multi-topic example of sync/async producers (publishers) and a consumer group (subsribers) allowing horizontal scaling of kafka consumers. The example uses tree names as references.
 
+`mock-request`: A simple example of using Golang's [mock](https://github.com/golang/mock) library.
+
 `struct-embedding`: A basic struct embedding example in Golang.
 
 `titan-prometheus`: A basic example of building a stats/metrics server for a running application using Prometheus.
