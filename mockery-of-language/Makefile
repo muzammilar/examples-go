@@ -58,7 +58,7 @@ modtidy:
 
 # add module requirements
 goget:
-	GOPRIVATE=${GOPRIVATE} go get -d -v ./...
+	GOPRIVATE=${GOPRIVATE} go get -v ./...
 
 goimports:
 	go install ${IMPORTS_PACKAGE}

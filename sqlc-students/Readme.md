@@ -1,6 +1,6 @@
 # SQLC Example
 
-Example of [sqlc](https://sqlc.dev/) with cockroach and postgresql.
+Example of [sqlc](https://sqlc.dev/) with postgresql.
 
 
 ### Using Docker Image
