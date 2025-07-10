@@ -5,15 +5,16 @@ import (
 	"log"
 	"reflect"
 	"strings"
+	"sync"
 )
 
-//MessageBase struct
+// MessageBase struct
 type MessageBaseA struct {
 	FieldA int    `msgtag:"field_a"`
 	FieldB uint32 `msgtag:"field_b"`
 }
 
-//MessageBaseB struct
+// MessageBaseB struct
 type MessageBaseB struct {
 	MessageBaseA
 	FieldK string `msgtag:"field_k"`
@@ -21,16 +22,17 @@ type MessageBaseB struct {
 	FieldM uint   `msgtag:"field_m"`
 }
 
-//MessageB struct
+// MessageB struct
 type Message struct {
 	MessageBaseA
 	MessageBaseB
-	FieldX int    `msgtag:"field_x"`
-	FieldY uint   `msgtag:"field_y"`
-	FieldZ string `msgtag:"field_z"`
+	sync.Mutex        // embedded a mutex so yo can perform .Lock() and .Unlock() on the struct itself
+	FieldX     int    `msgtag:"field_x"`
+	FieldY     uint   `msgtag:"field_y"`
+	FieldZ     string `msgtag:"field_z"`
 }
 
-//NewMessageBaseA
+// NewMessageBaseA
 func NewMessageBaseA() MessageBaseA {
 	return MessageBaseA{
 		FieldA: 1,
@@ -60,7 +62,7 @@ func NewMessage() Message {
 	}
 }
 
-//GetFlattenedTags gets a list of tags including from embedded structs
+// GetFlattenedTags gets a list of tags including from embedded structs
 // Note use of reflect on large datasets is expensive
 func GetFlattenedTags(tagName string, parentField string, iface interface{}) []string {
 	fields := make([]string, 0)
@@ -93,6 +95,10 @@ func main() {
 	var sb strings.Builder
 
 	msg := NewMessage()
+
+	// These two functions
+	msg.Lock()
+	defer msg.Unlock()
 
 	// get all the tags and all the variables
 	tagsSlice := GetFlattenedTags("msgtag", "msg", msg)
