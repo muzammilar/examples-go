@@ -1,5 +1,13 @@
 # Trees - Kafka Sync/Async Producers with a Consumer Group Example
 
+```sh
+# Alternative Libraries
+https://github.com/twmb/franz-go # relatively stable, powerful
+https://github.com/segmentio/kafka-go
+https://github.com/lovoo/goka
+```
+
+
 A basic example of a Kafka consumer group (and producers) using Shopify/sarama library with stats exposed to Prometheus. The example uses tree names (botanical trees - not softare trees) for pub.
 See the `trees` directory for code. In order to avoid multiple small modules for this PoC, all of the shared code between consumer and producer is in the `common` module
 
