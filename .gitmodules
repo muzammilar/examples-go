@@ -2,3 +2,6 @@
 	path = ext/geomrpc
 	url = https://github.com/muzammilar/geomrpc.git
 	branch = main
+[submodule "ext/ManGoDB"]
+	path = ext/ManGoDB
+	url = https://github.com/muzammilar/ManGoDB.git
