@@ -30,3 +30,13 @@ The `ext` directory project that are imported as git submodules.
 `sqlc-students`: A basic example of using sqlc to convert sql queries into golang structs.
 
 `titan-prometheus`: A basic example of building a stats/metrics server for a running application using Prometheus.
+
+## Call Visualizer
+
+```sh
+go install github.com/ofabry/go-callvis@latest
+go-callvis <module-name>
+# templated go project
+GODEBUG=gotypesalias=1 go-callvis ./sqlc-students/cmd
+GODEBUG=gotypesalias=1 go-callvis ./sqlc-students/db/postgres -focus pgqueries
+```
